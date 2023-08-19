@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import DBConnection from "../database/db.js"
 import userRouter from "../routes/userRoute.js"
+import forgetPassRouter from "../routes/forgetPassRoute.js"
 const app = express();
 
 // MiddleWares
@@ -11,7 +12,7 @@ app.use(cors());
 
 // Routes
 app.use("/auth",userRouter);
-// app.use("/problem-list", problemListRouter);
+app.use("/forget-pass", forgetPassRouter);
 // app.use("/problem-statement", problemStatementRouter);
 // app.use("/submissions", submissionRouter);
 

@@ -51,7 +51,7 @@ const userLoginControl = async (req, res) => {
       });
     }
 
-    // Check for passwword validity
+    // Check for password validity
     const passwordValid = await bcrypt.compare(userPassword, user.userPassword);
 
     if(!passwordValid)

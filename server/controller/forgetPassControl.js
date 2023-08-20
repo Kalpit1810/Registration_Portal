@@ -89,6 +89,7 @@ const changePassControl = async (req, res) => {
   const hashedPassword = await bcrypt.hash(newPassword, 10);
   try {
     await userModel.findOneAndUpdate({userEmail},{userPassword: hashedPassword});
+    console.log(`password Updated .${newPassword}.`);
     return res.json({
         message: "Password updated",
         success: "true",

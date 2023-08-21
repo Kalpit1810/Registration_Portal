@@ -1,12 +1,12 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { userModel } from "../models/Users.js";
-import dotenv from "dotenv"
+import dotenv from "dotenv";
 
 dotenv.config();
 
 const userSignupControl = async (req, res) => {
-  const { userEmail, userPassword} = req.body;
+  const { userEmail, userPassword } = req.body;
 
   try {
     const user1 = await userModel.findOne({ userEmail });
@@ -23,8 +23,8 @@ const userSignupControl = async (req, res) => {
     const hashedPassword = await bcrypt.hash(userPassword, 10);
 
     const newUser = new userModel({
-        userEmail,
-        userPassword: hashedPassword,
+      userEmail,
+      userPassword: hashedPassword,
     });
     await newUser.save();
 
@@ -53,21 +53,37 @@ const userLoginControl = async (req, res) => {
     // Check for password validity
     const passwordValid = await bcrypt.compare(userPassword, user.userPassword);
 
-    if(!passwordValid)
-    {
+    if (!passwordValid) {
       console.log("password doesn't match!");
-      return res.json({message: "Password doesn't match. Recheck Email and Password!"});
+      return res.json({
+        message: "Password doesn't match. Recheck Email and Password!",
+      });
     }
 
     // create jwt token
-    const token = jwt.sign({id: user._id},process.env.JWT_SECRET);
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
 
     console.log("User LoggedIn Successfully!!");
-    return res.json({token, userID: user._id,isAdmin: user.isAdmin, formFilled: user.formFilled,message: "User LoggedIn Successfully!!"});
+    return res.json({
+      token,
+      userID: user._id,
+      isAdmin: user.isAdmin,
+      formFilled: user.formFilled,
+      message: "User LoggedIn Successfully!!",
+    });
   } catch (error) {
     console.log("Error: ", error.message);
     return res.json({ message: "Some error occured please try again!" });
   }
 };
 
-export { userSignupControl, userLoginControl };
+const userAccessControl = async (req, res) => {
+  const token = req.body.token;
+  const userID = jwt.decode(token, process.env.JWT_SECRET);
+  const user = await userModel.findById(userID.id);
+  console.log("Access Decided")
+  return res.json({ isAdmin: user.isAdmin, formFilled: user.formFilled });
+  // 
+};
+
+export { userSignupControl, userLoginControl, userAccessControl };

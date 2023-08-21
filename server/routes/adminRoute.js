@@ -3,8 +3,8 @@ import {userListControl,userDeleteControl,userDownloadControl} from "../controll
 
 const adminRouter = express.Router();
 
-adminRouter.get("/user-list", userListControl);
+adminRouter.post("/user-list", userListControl);
 adminRouter.delete("/delete", userDeleteControl);
-adminRouter.get("/download", userDownloadControl);
+adminRouter.post("/download", userDownloadControl);
 
 export default adminRouter;

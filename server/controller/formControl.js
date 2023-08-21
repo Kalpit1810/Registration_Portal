@@ -1,6 +1,7 @@
 import { ishmtFileModel } from "../models/IshmtFile.js";
 import { paymentFileModel } from "../models/PaymentFile.js";
 import { formModel } from "../models/Form.js";
+import { userModel } from "../models/Users.js";
 
 const feesControl = async (req, res) => {
   const formData = req.body;
@@ -82,11 +83,11 @@ const feesControl = async (req, res) => {
   }
 
   console.log("category and fee calculated");
-  return res.json({ updatedFormData , success: "true" });
+  return res.json({ updatedFormData, success: "true" });
 };
 
 const submitControl = async (req, res) => {
-  const formData = req.body;
+  const formData = req.body.formData;
   const { ishmtIDFile, paymentReceipt } = req.files;
 
   if (ishmtIDFile) {
@@ -101,11 +102,12 @@ const submitControl = async (req, res) => {
         userID: formData.userID,
       });
       await file1.save();
-
-      
     } catch (error) {
       console.log("Error", error);
-      return res.json({ error }, { message: "Error Uploading File" ,success:"false"});
+      return res.json(
+        { error },
+        { message: "Error Uploading File", success: "false" }
+      );
     }
   }
 
@@ -121,14 +123,16 @@ const submitControl = async (req, res) => {
         userID: formData.userID,
       });
       await file1.save();
-
-
     } catch (error) {
       await ishmtFileModel.findOneAndDelete({
-      userID: req.body.userID,
-    });
+        userID: req.body.userID,
+      });
       console.log("Error", error);
-      return res.json({ error }, { message: "Error Uploading File" }, {success:"false"});
+      return res.json(
+        { error },
+        { message: "Error Uploading File" },
+        { success: "false" }
+      );
     }
   }
 
@@ -136,21 +140,30 @@ const submitControl = async (req, res) => {
     const file1 = new formModel(formData);
     await file1.save();
   } catch (error) {
-
     await ishmtFileModel.findOneAndDelete({
-      userID: req.body.userID,
+      userID : formData.userID,
     });
 
     await paymentFileModel.findOneAndDelete({
-      userID: req.body.userID,
+      userID: formData.userID,
     });
 
     console.log("Error", error);
-    return res.json({ error , message: "Error Uploading form Data" ,success:"false"});
+    return res.json({
+      error,
+      message: "Error Uploading form Data",
+      success: "false",
+    });
   }
 
   console.log("Data and File Uploaded successfully!!");
-  return res.json({ message: "Data and File Uploaded successfully." ,success:"true"});
+
+  await userModel.findByIdAndUpdate(formData.userID,{formFilled : true});
+  
+  return res.json({
+    message: "Data and File Uploaded successfully.",
+    success: "true",
+  });
 };
 
 export { feesControl, submitControl };

@@ -5,7 +5,7 @@ import { formModel } from "../models/Form.js";
 
 const userListControl = async (req, res) => {
   try {
-    const data = await userModel.find({ isAdmin: "false" }, { userEmail: 1 });
+    const data = await userModel.find({ isAdmin: "false" }, { userEmail: 1 }).sort({ userEmail: 1 });
     console.log("List Fetched Successfully");
     return res.json({ list: data, success: "true" });
   } catch (error) {
@@ -49,5 +49,9 @@ const userDeleteControl = async (req, res) => {
     });
   }
 };
+const userDownloadControl = async (req,res) =>{
+  const usersData = await formModel.find({}).sort({ fullName: 1 });
+  return res.json({usersData, success:"true"});
+};
 
-export { userListControl, userDeleteControl };
+export { userListControl, userDeleteControl, userDownloadControl };

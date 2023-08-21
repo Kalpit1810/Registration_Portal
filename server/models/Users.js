@@ -5,6 +5,7 @@ const schema = new mongoose.Schema({
   userPassword: { type: String, required: true },
   formFilled: { type: Boolean, default: false, required: true },
   isAdmin: { type: Boolean, default: false, required: true },
+  date: { type: Date, default : Date.now },
 });
 
 export const userModel = mongoose.model("users", schema);

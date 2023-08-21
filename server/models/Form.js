@@ -18,7 +18,9 @@ const schema = new mongoose.Schema({
   profile: { type: String, required: true },
   accompanyingPersons: { type: String, required: true },
   isIshmtMember: { type: String, required: true },
+  paymentReferenceNumber: { type: String, required: true, unique: true },
   userID: {type: mongoose.Schema.Types.ObjectId, ref: "users", require: true, unique: true,},
+  date: { type: Date, default : Date.now },
 });
 
 export const formModel = mongoose.model("Form", schema);

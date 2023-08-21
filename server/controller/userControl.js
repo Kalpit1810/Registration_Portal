@@ -25,7 +25,6 @@ const userSignupControl = async (req, res) => {
     const newUser = new userModel({
         userEmail,
         userPassword: hashedPassword,
-        isAdmin: false,
     });
     await newUser.save();
 
@@ -64,7 +63,7 @@ const userLoginControl = async (req, res) => {
     const token = jwt.sign({id: user._id},process.env.JWT_SECRET);
 
     console.log("User LoggedIn Successfully!!");
-    return res.json({token, userID: user._id,message: "User LoggedIn Successfully!!"});
+    return res.json({token, userID: user._id,isAdmin: user.isAdmin, formFilled: user.formFilled,message: "User LoggedIn Successfully!!"});
   } catch (error) {
     console.log("Error: ", error.message);
     return res.json({ message: "Some error occured please try again!" });

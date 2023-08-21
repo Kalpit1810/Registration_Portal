@@ -4,16 +4,10 @@ import multer from "multer";
 
 const formRouter = express.Router();
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, 'C:\\Dev_Project\\Registration_Portal\\server\\images')
-    },
-    filename: function (req, file, cb) {
-      cb(null, `${uuid()}.cpp`)
-    }
-  });
+const storage = multer.memoryStorage()
+const upload = multer({storage});
 
 formRouter.post("/fee",feesControl);
-formRouter.post("/submit",submitControl);
+formRouter.post("/submit",upload.fields([{name : "ishmtIDFile"}, {name : "paymentReceipt"}]),submitControl);
 
 export default formRouter;

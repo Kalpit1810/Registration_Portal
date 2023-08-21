@@ -1,3 +1,7 @@
+import { ishmtFileModel } from "../models/IshmtFile.js";
+import { paymentFileModel } from "../models/PaymentFile.js";
+import { formModel } from "../models/Form.js";
+
 const feesControl = async (req, res) => {
   const formData = req.body;
 
@@ -22,7 +26,7 @@ const feesControl = async (req, res) => {
     SIM: 11000,
     SIN: 12100,
     NSN: 200,
-    NFN: 4600,
+    NFN: 460,
     NIN: 550,
   };
   if (Saarc.includes(formData.country)) {
@@ -31,11 +35,11 @@ const feesControl = async (req, res) => {
     category += "N";
   }
 
-  if (formData.profile == "Student") {
+  if (formData.profile == "student") {
     category += "S";
-  } else if (formData.profile == "Faculty") {
+  } else if (formData.profile == "faculty") {
     category += "F";
-  } else if (formData.profile == "Research") {
+  } else if (formData.profile == "industry") {
     category += "I";
   }
 
@@ -44,11 +48,7 @@ const feesControl = async (req, res) => {
   } else if (formData.isIshmtMember == "No") {
     category += "N";
   }
-  console.log(
-    categoryFees[category],
-    1 + 0.25 * (Number(formData.paperCount) - 1),
-    Number(formData.accompanyingPersons)
-  );
+
   if (category[0] == "S") {
     fee =
       categoryFees[category] * (1 + 0.25 * (Number(formData.paperCount) - 1)) +
@@ -70,25 +70,87 @@ const feesControl = async (req, res) => {
   }
   let updatedFormData;
   if (category[0] == "S") {
-     updatedFormData = {
-      ...formData,
+    updatedFormData = {
       category: category,
-      fee: `Rs ${fee}`,
+      fee: `INR ${fee}`,
     };
   } else {
-     updatedFormData = {
-      ...formData,
+    updatedFormData = {
       category: category,
-      fee: `$ ${fee}`,
+      fee: `USD ${fee}`,
     };
   }
-  
+
   console.log("category and fee calculated");
-  return res.json(updatedFormData);
+  return res.json({ updatedFormData , success: "true" });
 };
 
 const submitControl = async (req, res) => {
+  const formData = req.body;
+  const { ishmtIDFile, paymentReceipt } = req.files;
 
+  if (ishmtIDFile) {
+    const ext = ishmtIDFile[0].originalname.split(`.`).pop();
+
+    const fileName =
+      formData.fullName + "_" + formData.userID + "_ISHMT_ID." + ext;
+    try {
+      const file1 = new ishmtFileModel({
+        fileName,
+        fileData: ishmtIDFile[0].buffer,
+        userID: formData.userID,
+      });
+      await file1.save();
+
+      
+    } catch (error) {
+      console.log("Error", error);
+      return res.json({ error }, { message: "Error Uploading File" ,success:"false"});
+    }
+  }
+
+  if (paymentReceipt) {
+    const ext = paymentReceipt[0].originalname.split(`.`).pop();
+    const fileName =
+      formData.fullName + "_" + formData.userID + "_payment_recipt." + ext;
+
+    try {
+      const file1 = new paymentFileModel({
+        fileName,
+        fileData: paymentReceipt[0].buffer,
+        userID: formData.userID,
+      });
+      await file1.save();
+
+
+    } catch (error) {
+      await ishmtFileModel.findOneAndDelete({
+      userID: req.body.userID,
+    });
+      console.log("Error", error);
+      return res.json({ error }, { message: "Error Uploading File" }, {success:"false"});
+    }
+  }
+
+  try {
+    const file1 = new formModel(formData);
+    await file1.save();
+  } catch (error) {
+
+    await ishmtFileModel.findOneAndDelete({
+      userID: req.body.userID,
+    });
+
+    await paymentFileModel.findOneAndDelete({
+      userID: req.body.userID,
+    });
+
+    console.log("Error", error);
+    return res.json({ error , message: "Error Uploading form Data" ,success:"false"});
+  }
+
+  console.log("Data and File Uploaded successfully!!");
+  return res.json({ message: "Data and File Uploaded successfully." ,success:"true"});
 };
 
 export { feesControl, submitControl };

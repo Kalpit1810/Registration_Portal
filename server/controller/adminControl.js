@@ -1,4 +1,7 @@
 import { userModel } from "../models/Users.js";
+import { ishmtFileModel } from "../models/IshmtFile.js";
+import { paymentFileModel } from "../models/PaymentFile.js";
+import { formModel } from "../models/Form.js";
 
 const userListControl = async (req, res) => {
   try {
@@ -17,10 +20,24 @@ const userListControl = async (req, res) => {
 
 const userDeleteControl = async (req, res) => {
   try {
-    await userModel.findOneAndDelete({
-      userEmail: req.body.email,
+    await userModel.findByIdAndDelete(req.body.userID);
+
+    await ishmtFileModel.findOneAndDelete({
+      userID: req.body.userID,
     });
-    const data = await userModel.find({ isAdmin: "false" }, { userEmail: 1 });
+
+    await paymentFileModel.findOneAndDelete({
+      userID: req.body.userID,
+    });
+
+    await formModel.findOneAndDelete({
+      userID: req.body.userID,
+    });
+
+    const data = await userModel
+      .find({ isAdmin: "false" }, { userEmail: 1 })
+      .sort({ userEmail: 1 });
+
     console.log("User Deleted Successfully!!");
     return res.json({ list: data, message: "User Deleted.", success: "true" });
   } catch (error) {

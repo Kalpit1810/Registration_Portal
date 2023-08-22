@@ -87,9 +87,9 @@ const feesControl = async (req, res) => {
 };
 
 const submitControl = async (req, res) => {
-  const formData = req.body.formData;
+  const formData = req.body;
   const { ishmtIDFile, paymentReceipt } = req.files;
-
+  // console.log(ishmtIDFile, "--->>");
   if (ishmtIDFile) {
     const ext = ishmtIDFile[0].originalname.split(`.`).pop();
 

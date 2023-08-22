@@ -7,6 +7,7 @@ import formRouter from "../routes/formRoute.js"
 import adminRouter from "../routes/adminRoute.js"
 const app = express();
 
+const port = 3001;
 // MiddleWares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -22,4 +23,4 @@ DBConnection();
 
 
 
-app.listen("3001", () => console.log("server started!"));
+app.listen(port, () => console.log(`server started on port ${port}!`));

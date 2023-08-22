@@ -69,6 +69,7 @@ const userDeleteControl = async (req, res) => {
 };
 const userDownloadControl = async (req,res) =>{
   const token = req.body.token;
+  console.log(token);
   const userID = jwt.decode(token, process.env.JWT_SECRET);
   const user = await userModel.findById(userID.id);
   if(!user.isAdmin)

@@ -51,7 +51,7 @@ const userLoginControl = async (req, res) => {
     }
 
     // Check for password validity
-    const passwordValid = await bcrypt.compare(userPassword, user.userPassword);
+    const passwordValid = await bcrypt.compare(userPassword, user?.userPassword);
 
     if (!passwordValid) {
       console.log("password doesn't match!");
@@ -61,14 +61,14 @@ const userLoginControl = async (req, res) => {
     }
 
     // create jwt token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+    const token = jwt.sign({ id: user?._id }, process.env.JWT_SECRET);
 
     console.log("User LoggedIn Successfully!!");
     return res.json({
       token,
-      userID: user._id,
-      isAdmin: user.isAdmin,
-      formFilled: user.formFilled,
+      userID: user?._id,
+      isAdmin: user?.isAdmin,
+      formFilled: user?.formFilled,
       message: "User LoggedIn Successfully!!",
     });
   } catch (error) {
@@ -78,11 +78,11 @@ const userLoginControl = async (req, res) => {
 };
 
 const userAccessControl = async (req, res) => {
-  const token = req.body.token;
+  const token = req.body?.token;
   const userID = jwt.decode(token, process.env.JWT_SECRET);
-  const user = await userModel.findById(userID.id);
+  const user = await userModel.findById(userID?.id);
   console.log("Access Decided")
-  return res.json({ isAdmin: user.isAdmin, formFilled: user.formFilled });
+  return res.json({ isAdmin: user?.isAdmin, formFilled: user?.formFilled });
   // 
 };
 

@@ -6,8 +6,6 @@ import nodemailer from "nodemailer";
 
 const feesControl = async (req, res) => {
   const formData = req.body;
-
-  console.log(formData);
   let category = "";
   let fee = 0;
   const Saarc = [
@@ -27,17 +25,17 @@ const feesControl = async (req, res) => {
     SFN: 9600,
     SIM: 11000,
     SIN: 12100,
-    NSN: 200,
-    NFN: 460,
-    NIN: 550,
+    NSN: 16600,
+    NFN: 38180,
+    NIN: 45650,
   };
-  if (Saarc.includes(formData.country)) {
+  if (Saarc.includes(formData?.country)) {
     category += "S";
   } else {
     category += "N";
   }
 
-  if (formData.profile == "student") {
+  if (formData?.profile == "student") {
     category += "S";
   } else if (formData.profile == "faculty") {
     category += "F";
@@ -45,20 +43,20 @@ const feesControl = async (req, res) => {
     category += "I";
   }
 
-  if (formData.isIshmtMember == "Yes") {
+  if (formData?.isIshmtMember == "Yes") {
     category += "M";
-  } else if (formData.isIshmtMember == "No") {
+  } else if (formData?.isIshmtMember == "No") {
     category += "N";
   }
 
   if (category[0] == "S") {
     fee =
-      categoryFees[category] * (1 + 0.25 * (Number(formData.paperCount) - 1)) +
-      3800 * Number(formData.accompanyingPersons);
+      categoryFees[category] * (1 + 0.25 * (Number(formData?.paperCount) - 1)) +
+      3800 * Number(formData?.accompanyingPersons);
   } else {
     fee =
-      categoryFees[category] * (1 + 0.25 * (Number(formData.paperCount) - 1)) +
-      180 * Number(formData.accompanyingPersons);
+      categoryFees[category] * (1 + 0.25 * (Number(formData?.paperCount) - 1)) +
+      180 * Number(formData?.accompanyingPersons);
   }
 
   const currentTime = new Date();
@@ -70,18 +68,10 @@ const feesControl = async (req, res) => {
   } else {
     fee = fee * 1.18;
   }
-  let updatedFormData;
-  if (category[0] == "S") {
-    updatedFormData = {
+  const updatedFormData={
       category: category,
       fee: `INR ${fee}`,
     };
-  } else {
-    updatedFormData = {
-      category: category,
-      fee: `USD ${fee}`,
-    };
-  }
 
   console.log("category and fee calculated");
   return res.json({ updatedFormData, success: "true" });
@@ -116,24 +106,23 @@ function generateEmailContent(formData) {
     </style>
     <div class="container">
       <h3>Conference Registration Details</h3>
-      <p><strong>Name:</strong> ${formData.fullName}</p>
-      <p><strong>Honorific:</strong> ${formData.honorific}</p>
-      <p><strong>Gender:</strong> ${formData.gender}</p>
-      <p><strong>Year of Birth:</strong> ${formData.birthYear}</p>
-      <p><strong>Primary Affiliation:</strong> ${formData.primaryAffiliation}</p>
-      <p><strong>Country:</strong> ${formData.country}</p>
-      <p><strong>Email:</strong> ${formData.email}</p>
-      <p><strong>Contact Number:</strong> ${formData.contactNumberCode}${formData.contactNumber}</p>
-      <p><strong>WhatsApp Number:</strong> ${formData.whatsappNumberCode}${formData.whatsappNumber}</p>
-      <p><strong>Number of Papers:</strong> ${formData.paperCount}</p>
-      <p><strong>Paper #1 ID:</strong> ${formData.paper1Id}</p>
-      ${formData.paperCount === "2" ? `<p><strong>Paper #2 ID:</strong> ${formData.paper2Id}</p>` : ''}
-      <p><strong>Profile:</strong> ${formData.profile}</p>
-      <p><strong>Accompanying Persons:</strong> ${formData.accompanyingPersons}</p>
-      <p><strong>ISHMT Member:</strong> ${formData.isIshmtMember}</p>
-      ${formData.isIshmtMember === "Yes" ? `<p><strong>ISHMT ID File:</strong> [Attached]</p>` : ''}
-      <p><strong>Payment Reference Number:</strong> ${formData.paymentReferenceNumber}</p>
-      <p><strong>Comment:</strong> ${formData.comment}</p>
+      <p><strong>Name:</strong> ${formData?.fullName}</p>
+      <p><strong>Honorific:</strong> ${formData?.honorific}</p>
+      <p><strong>Gender:</strong> ${formData?.gender}</p>
+      <p><strong>Year of Birth:</strong> ${formData?.birthYear}</p>
+      <p><strong>Primary Affiliation:</strong> ${formData?.primaryAffiliation}</p>
+      <p><strong>Country:</strong> ${formData?.country}</p>
+      <p><strong>Email:</strong> ${formData?.email}</p>
+      <p><strong>Contact Number:</strong> ${formData?.contactNumberCode}${formData?.contactNumber}</p>
+      <p><strong>WhatsApp Number:</strong> ${formData?.whatsappNumberCode}${formData?.whatsappNumber}</p>
+      <p><strong>Number of Papers:</strong> ${formData?.paperCount}</p>
+      <p><strong>Paper #1 ID:</strong> ${formData?.paper1Id}</p>
+      ${formData?.paperCount === "2" ? `<p><strong>Paper #2 ID:</strong> ${formData?.paper2Id}</p>` : ''}
+      <p><strong>Profile:</strong> ${formData?.profile}</p>
+      <p><strong>Accompanying Persons:</strong> ${formData?.accompanyingPersons}</p>
+      <p><strong>ISHMT Member:</strong> ${formData?.isIshmtMember}</p>
+      <p><strong>Payment Reference Number:</strong> ${formData?.paymentReferenceNumber}</p>
+      <p><strong>Comment:</strong> ${formData?.comment}</p>
     </div>
   `;
 }
@@ -145,15 +134,15 @@ const submitControl = async (req, res) => {
   const { ishmtIDFile, paymentReceipt } = req.files;
   // console.log(ishmtIDFile, "--->>");
   if (ishmtIDFile) {
-    const ext = ishmtIDFile[0].originalname.split(`.`).pop();
+    const ext = ishmtIDFile[0]?.originalname.split(`.`).pop();
 
     const fileName =
-      formData.fullName + "_" + formData.userID + "_ISHMT_ID." + ext;
+      formData?.fullName + "_" + formData?.userID + "_ISHMT_ID." + ext;
     try {
       const file1 = new ishmtFileModel({
         fileName,
-        fileData: ishmtIDFile[0].buffer,
-        userID: formData.userID,
+        fileData: ishmtIDFile[0]?.buffer,
+        userID: formData?.userID,
       });
       await file1.save();
     } catch (error) {
@@ -168,18 +157,18 @@ const submitControl = async (req, res) => {
   if (paymentReceipt) {
     const ext = paymentReceipt[0].originalname.split(`.`).pop();
     const fileName =
-      formData.fullName + "_" + formData.userID + "_payment_recipt." + ext;
+      formData?.fullName + "_" + formData?.userID + "_payment_recipt." + ext;
 
     try {
       const file1 = new paymentFileModel({
         fileName,
-        fileData: paymentReceipt[0].buffer,
-        userID: formData.userID,
+        fileData: paymentReceipt[0]?.buffer,
+        userID: formData?.userID,
       });
       await file1.save();
     } catch (error) {
-      await ishmtFileModel.findOneAndDelete({
-        userID: req.body.userID,
+      await ishmtFileModel?.findOneAndDelete({
+        userID: req.body?.userID,
       });
       console.log("Error", error);
       return res.json(
@@ -195,11 +184,11 @@ const submitControl = async (req, res) => {
     await file1.save();
   } catch (error) {
     await ishmtFileModel.findOneAndDelete({
-      userID: formData.userID,
+      userID: formData?.userID,
     });
 
     await paymentFileModel.findOneAndDelete({
-      userID: formData.userID,
+      userID: formData?.userID,
     });
 
     console.log("Error", error);
@@ -212,11 +201,11 @@ const submitControl = async (req, res) => {
 
   console.log("Data and File Uploaded successfully!!");
 
-  await userModel.findByIdAndUpdate(formData.userID, { formFilled: true });
+  await userModel.findByIdAndUpdate(formData?.userID, { formFilled: true });
 
-  const user = await userModel.findById(formData.userID);
+  const user = await userModel.findById(formData?.userID);
   console.log(user, "-->");
-  const userMail = user.userEmail;
+  const userMail = user?.userEmail;
   const senderEmail = "kalpit1018@gmail.com";
   const senderPassword = "qipcasvogayahqqf";
 
@@ -245,7 +234,7 @@ const submitControl = async (req, res) => {
           otpToken: "",
         });
       }
-      console.log("Email sent:", info.response);
+      console.log("Email sent:", info?.response);
       return res.json({
         message: `OTP sent to your email id ${userMail}`,
         success: true,

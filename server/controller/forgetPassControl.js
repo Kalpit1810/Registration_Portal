@@ -5,7 +5,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 const sendOtpControl = async (req, res) => {
-  const userEmail = req.body.email;
+  const userEmail = req.body?.email;
   try {
     const user = await userModel.findOne({ userEmail });
     if (!user) {
@@ -44,7 +44,7 @@ const sendOtpControl = async (req, res) => {
 
     try {
       transporter.sendMail(mailOptions, (error, info) => {
-        console.log("Email sent:" + info.response);
+        console.log("Email sent:" + info?.response);
         return res.json({
           message: `OTP sent to your email id ${userEmail}`,
           success: "true",
@@ -60,7 +60,7 @@ const sendOtpControl = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(`Error: ${error.message}`);
+    console.log(`Error: ${error?.message}`);
     return res.json({
       message: `Some error occured. Please try again.`,
       success: "false",
@@ -72,7 +72,7 @@ const sendOtpControl = async (req, res) => {
 const verifyOtpControl = async (req, res) => {
   const { otpToken, userOTP } = req.body;
   const otp = jwt.decode(otpToken, process.env.JWT_SECRET);
-  if (userOTP == otp.otp) {
+  if (userOTP == otp?.otp) {
     console.log("OTP verified");
     return res.json({ message: "OTP verified.", success: "true" });
   } else {

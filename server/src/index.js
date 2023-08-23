@@ -11,7 +11,7 @@ const port = 3001;
 // MiddleWares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use(cors({exposedHeaders: ['Content-Disposition']}));
 
 // Routes
 app.use("/auth",userRouter);

@@ -20,6 +20,8 @@ const schema = new mongoose.Schema({
   isIshmtMember: { type: String, required: true },
   paymentReferenceNumber: { type: String, required: true, unique: true },
   userID: {type: mongoose.Schema.Types.ObjectId, ref: "users", require: true, unique: true,},
+  category: {type: String,  require: true},
+  fee: {type: String,  require: true},
   date: { type: Date, default : Date.now },
 });
 

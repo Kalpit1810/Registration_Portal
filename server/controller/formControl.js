@@ -51,11 +51,11 @@ const feesControl = async (req, res) => {
 
   if (category[0] == "S") {
     fee =
-      categoryFees[category] * (1 + 0.25 * (Number(formData?.paperCount) - 1)) +
+      categoryFees[category] * (1 + 0.25 * (Math.max(Number(formData?.paperCount) - 1),0)) +
       3800 * Number(formData?.accompanyingPersons);
   } else {
     fee =
-      categoryFees[category] * (1 + 0.25 * (Number(formData?.paperCount) - 1)) +
+      categoryFees[category] * (1 + 0.25 * (Math.max(Number(formData?.paperCount) - 1),0)) +
       180 * Number(formData?.accompanyingPersons);
   }
 

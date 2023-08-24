@@ -82,7 +82,7 @@ const userAccessControl = async (req, res) => {
   const userID = jwt.decode(token, process.env.JWT_SECRET);
   const user = await userModel.findById(userID?.id);
   console.log("Access Decided")
-  return res.json({ isAdmin: user?.isAdmin, formFilled: user?.formFilled });
+  return res.json({ isAdmin: user?.isAdmin, formFilled: user?.formFilled, userEmail : user?.userEmail });
   // 
 };
 

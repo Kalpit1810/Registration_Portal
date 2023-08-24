@@ -56,7 +56,7 @@ const feesControl = async (req, res) => {
   } else {
     fee =
       categoryFees[category] * (1 + 0.25 * (Math.max(Number(formData?.paperCount) - 1),0)) +
-      180 * Number(formData?.accompanyingPersons);
+      14940 * Number(formData?.accompanyingPersons);
   }
 
   const currentTime = new Date();
@@ -68,6 +68,8 @@ const feesControl = async (req, res) => {
   } else {
     fee = fee * 1.18;
   }
+
+  fee = Number(fee.toFixed(0));
   const updatedFormData={
       category: category,
       fee: `INR ${fee}`,
@@ -113,8 +115,8 @@ function generateEmailContent(formData) {
       <p><strong>Primary Affiliation:</strong> ${formData?.primaryAffiliation}</p>
       <p><strong>Country:</strong> ${formData?.country}</p>
       <p><strong>Email:</strong> ${formData?.email}</p>
-      <p><strong>Contact Number:</strong> ${formData?.contactNumberCode}${formData?.contactNumber}</p>
-      <p><strong>WhatsApp Number:</strong> ${formData?.whatsappNumberCode}${formData?.whatsappNumber}</p>
+      <p><strong>Contact Number:</strong> +${formData?.contactNumberCode}-${formData?.contactNumber}</p>
+      <p><strong>WhatsApp Number:</strong> +${formData?.whatsappNumberCode}-${formData?.whatsappNumber}</p>
       <p><strong>Number of Papers:</strong> ${formData?.paperCount}</p>
       <p><strong>Paper #1 ID:</strong> ${formData?.paper1Id}</p>
       ${formData?.paperCount === "2" ? `<p><strong>Paper #2 ID:</strong> ${formData?.paper2Id}</p>` : ''}

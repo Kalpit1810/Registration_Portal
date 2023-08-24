@@ -3,7 +3,7 @@ import { ishmtFileModel } from "../models/IshmtFile.js";
 import { paymentFileModel } from "../models/PaymentFile.js";
 import { formModel } from "../models/Form.js";
 import jwt from "jsonwebtoken";
-
+import archiver from "archiver";
 const userListControl = async (req, res) => {
   const token = req.body?.token;
   const userID = jwt.decode(token, process.env.JWT_SECRET);
@@ -81,20 +81,20 @@ const userDownloadControl = async (req, res) => {
 };
 
 const userPaymentFileControl = async (req, res) => {
-    const token = req.body?.token;
-    const userID = req.body?.userID;
-    const adminID = jwt.decode(token, process.env.JWT_SECRET);
-    const admin = await userModel.findById(adminID?.id);
-    if (!admin?.isAdmin) {
-      console.log("Unautorized Access!");
-      return res.json({ message: "Access Denied", success: "false" });
-    }
-  
-    try {
-      const fileDocument = await paymentFileModel.findOne({ userID });
+  const token = req.body?.token;
+  const userID = req.body?.userID;
+  const adminID = jwt.decode(token, process.env.JWT_SECRET);
+  const admin = await userModel.findById(adminID?.id);
+  if (!admin?.isAdmin) {
+    console.log("Unautorized Access!");
+    return res.json({ message: "Access Denied", success: "false" });
+  }
+
+  try {
+    const fileDocument = await paymentFileModel.findOne({ userID });
 
     if (!fileDocument) {
-        console.log("File not found");
+      console.log("File not found");
       return res.status(404).json({ message: "File not found" });
     }
 
@@ -127,7 +127,7 @@ const userIshmtIDControl = async (req, res) => {
     const fileDocument = await ishmtFileModel.findOne({ userID });
 
     if (!fileDocument) {
-        console.log("File not found");
+      console.log("File not found");
       return res.status(404).json({ message: "File not found" });
     }
 
@@ -146,10 +146,87 @@ const userIshmtIDControl = async (req, res) => {
   }
 };
 
+const allPaymentFileControl = async (req, res) => {
+  const token = req.body?.token;
+  const adminID = jwt.decode(token, process.env.JWT_SECRET);
+  const admin = await userModel.findById(adminID?.id);
+  if (!admin?.isAdmin) {
+    console.log("Unautorized Access!");
+    return res.json({ message: "Access Denied", success: "false" });
+  }
+
+  try {
+    const files = await paymentFileModel.find();
+    if (files.length === 0) {
+      return res.json({ message: 'No files found', success: "false"});
+    }
+
+    const archive = archiver('zip', { zlib: { level: 9 } });
+
+    res.setHeader('Content-Disposition', 'attachment; filename=aPaymentFiles.zip');
+    res.setHeader('Content-Type', 'application/zip');
+
+    const output = res;
+    archive.pipe(output);
+
+    files.forEach((file) => {
+      archive.append(file.fileData, { name: file.fileName });
+    });
+
+    archive.finalize(() => {
+      output.end();
+    });
+    console.log("All payment files downloaded successfully");
+  } catch (error) {
+    console.error(error);
+    res.json({ message: 'Internal server error' });
+  }
+
+
+};
+
+const allIshmtIDControl = async (req, res) => {
+  const token = req.body?.token;
+  const adminID = jwt.decode(token, process.env.JWT_SECRET);
+  const admin = await userModel.findById(adminID?.id);
+  if (!admin?.isAdmin) {
+    console.log("Unautorized Access!");
+    return res.json({ message: "Access Denied", success: "false" });
+  };
+  try {
+    const files = await ishmtFileModel.find();
+    if (files.length === 0) {
+      return res.json({ message: 'No files found', success: "false"});
+    }
+
+    const archive = archiver('zip', { zlib: { level: 9 } });
+
+    res.setHeader('Content-Disposition', 'attachment; filename=IshmtIDFiles.zip');
+    res.setHeader('Content-Type', 'application/zip');
+
+    const output = res;
+    archive.pipe(output);
+
+    files.forEach((file) => {
+      archive.append(file.fileData, { name: file.fileName });
+    });
+
+    archive.finalize(() => {
+      output.end();
+    });
+    console.log("All ISHMT ID files downloaded successfully");
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 export {
   userListControl,
   userDeleteControl,
   userDownloadControl,
   userPaymentFileControl,
   userIshmtIDControl,
+  allPaymentFileControl,
+  allIshmtIDControl,
 };

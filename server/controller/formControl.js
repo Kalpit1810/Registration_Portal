@@ -51,11 +51,13 @@ const feesControl = async (req, res) => {
 
   if (category[0] == "S") {
     fee =
-      categoryFees[category] * (1 + 0.25 * (Math.max(Number(formData?.paperCount) - 1),0)) +
+      categoryFees[category] *
+        (1 + 0.25 * (Math.max(Number(formData?.paperCount) - 1), 0)) +
       3800 * Number(formData?.accompanyingPersons);
   } else {
     fee =
-      categoryFees[category] * (1 + 0.25 * (Math.max(Number(formData?.paperCount) - 1),0)) +
+      categoryFees[category] *
+        (1 + 0.25 * (Math.max(Number(formData?.paperCount) - 1), 0)) +
       14940 * Number(formData?.accompanyingPersons);
   }
 
@@ -70,10 +72,10 @@ const feesControl = async (req, res) => {
   }
 
   fee = Number(fee.toFixed(0));
-  const updatedFormData={
-      category: category,
-      fee: `INR ${fee}`,
-    };
+  const updatedFormData = {
+    category: category,
+    fee: `INR ${fee}`,
+  };
 
   console.log("category and fee calculated");
   return res.json({ updatedFormData, success: "true" });
@@ -108,27 +110,41 @@ function generateEmailContent(formData) {
     </style>
     <div class="container">
       <h3>Conference Registration Details</h3>
-      <p><strong>Name:</strong> ${formData?.fullName}</p>
+      <p><strong>First Name:</strong> ${formData?.firstName}</p>
+      <p><strong>Last Name:</strong> ${formData?.lastName}</p>
       <p><strong>Honorific:</strong> ${formData?.honorific}</p>
       <p><strong>Gender:</strong> ${formData?.gender}</p>
       <p><strong>Year of Birth:</strong> ${formData?.birthYear}</p>
-      <p><strong>Primary Affiliation:</strong> ${formData?.primaryAffiliation}</p>
+      <p><strong>Primary Affiliation:</strong> ${
+        formData?.primaryAffiliation
+      }</p>
       <p><strong>Country:</strong> ${formData?.country}</p>
       <p><strong>Email:</strong> ${formData?.email}</p>
-      <p><strong>Contact Number:</strong> +${formData?.contactNumberCode}-${formData?.contactNumber}</p>
-      <p><strong>WhatsApp Number:</strong> +${formData?.whatsappNumberCode}-${formData?.whatsappNumber}</p>
+      <p><strong>Contact Number:</strong> +${formData?.contactNumberCode}-${
+    formData?.contactNumber
+  }</p>
+      <p><strong>WhatsApp Number:</strong> +${formData?.whatsappNumberCode}-${
+    formData?.whatsappNumber
+  }</p>
       <p><strong>Number of Papers:</strong> ${formData?.paperCount}</p>
       <p><strong>Paper #1 ID:</strong> ${formData?.paper1Id}</p>
-      ${formData?.paperCount === "2" ? `<p><strong>Paper #2 ID:</strong> ${formData?.paper2Id}</p>` : ''}
+      ${
+        formData?.paperCount === "2"
+          ? `<p><strong>Paper #2 ID:</strong> ${formData?.paper2Id}</p>`
+          : ""
+      }
       <p><strong>Profile:</strong> ${formData?.profile}</p>
-      <p><strong>Accompanying Persons:</strong> ${formData?.accompanyingPersons}</p>
+      <p><strong>Accompanying Persons:</strong> ${
+        formData?.accompanyingPersons
+      }</p>
       <p><strong>ISHMT Member:</strong> ${formData?.isIshmtMember}</p>
-      <p><strong>Payment Reference Number:</strong> ${formData?.paymentReferenceNumber}</p>
+      <p><strong>Payment Reference Number:</strong> ${
+        formData?.paymentReferenceNumber
+      }</p>
       <p><strong>Comment:</strong> ${formData?.comment}</p>
     </div>
   `;
 }
-
 
 const submitControl = async (req, res) => {
   const formData = req.body;
@@ -138,8 +154,7 @@ const submitControl = async (req, res) => {
   if (ishmtIDFile) {
     const ext = ishmtIDFile[0]?.originalname.split(`.`).pop();
 
-    const fileName =
-      formData?.fullName + "_" + formData?.userID + "_ISHMT_ID." + ext;
+    const fileName = formData?.userEmail + "_ISHMT_ID." + ext;
     try {
       const file1 = new ishmtFileModel({
         fileName,
@@ -158,8 +173,7 @@ const submitControl = async (req, res) => {
 
   if (paymentReceipt) {
     const ext = paymentReceipt[0].originalname.split(`.`).pop();
-    const fileName =
-      formData?.fullName + "_" + formData?.userID + "_payment_recipt." + ext;
+    const fileName = formData?.userEmail + "_payment_recipt." + ext;
 
     try {
       const file1 = new paymentFileModel({

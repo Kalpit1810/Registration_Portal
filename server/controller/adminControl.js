@@ -16,7 +16,7 @@ const userListControl = async (req, res) => {
 
   try {
     const data = await userModel
-      .find({ isAdmin: "false" }, { userEmail: 1 })
+      .find({ isAdmin: "false" }, { userEmail: 1, formFilled: 1, isVerified: 1 })
       .sort({ userEmail: 1 });
     console.log("List Fetched Successfully");
     return res.json({ list: data, success: "true" });
@@ -158,13 +158,16 @@ const allPaymentFileControl = async (req, res) => {
   try {
     const files = await paymentFileModel.find();
     if (files.length === 0) {
-      return res.json({ message: 'No files found', success: "false"});
+      return res.json({ message: "No files found", success: "false" });
     }
 
-    const archive = archiver('zip', { zlib: { level: 9 } });
+    const archive = archiver("zip", { zlib: { level: 9 } });
 
-    res.setHeader('Content-Disposition', 'attachment; filename=aPaymentFiles.zip');
-    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=aPaymentFiles.zip"
+    );
+    res.setHeader("Content-Type", "application/zip");
 
     const output = res;
     archive.pipe(output);
@@ -179,10 +182,8 @@ const allPaymentFileControl = async (req, res) => {
     console.log("All payment files downloaded successfully");
   } catch (error) {
     console.error(error);
-    res.json({ message: 'Internal server error' });
+    res.json({ message: "Internal server error" });
   }
-
-
 };
 
 const allIshmtIDControl = async (req, res) => {
@@ -192,17 +193,20 @@ const allIshmtIDControl = async (req, res) => {
   if (!admin?.isAdmin) {
     console.log("Unautorized Access!");
     return res.json({ message: "Access Denied", success: "false" });
-  };
+  }
   try {
     const files = await ishmtFileModel.find();
     if (files.length === 0) {
-      return res.json({ message: 'No files found', success: "false"});
+      return res.json({ message: "No files found", success: "false" });
     }
 
-    const archive = archiver('zip', { zlib: { level: 9 } });
+    const archive = archiver("zip", { zlib: { level: 9 } });
 
-    res.setHeader('Content-Disposition', 'attachment; filename=IshmtIDFiles.zip');
-    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=IshmtIDFiles.zip"
+    );
+    res.setHeader("Content-Type", "application/zip");
 
     const output = res;
     archive.pipe(output);
@@ -217,7 +221,37 @@ const allIshmtIDControl = async (req, res) => {
     console.log("All ISHMT ID files downloaded successfully");
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const userFormDetailControl = async (req, res) => {
+  const token = req.body?.token;
+  const userID = req.body?.userID;
+  const adminID = jwt.decode(token, process.env.JWT_SECRET);
+  const admin = await userModel.findById(adminID?.id);
+  if (!admin?.isAdmin) {
+    console.log("Unautorized Access!");
+    return res.json({ message: "Access Denied", success: "false" });
+  }
+
+  try {
+    const formData = await formModel.findOne({ userID });
+    if (!formData) {
+      console.log("can't find form data of the user.");
+      return res.json({
+        message: "Can't find form data of the user",
+        success: "false",
+      });
+    }
+
+    return res.json({ formData, success: "true" });
+  } catch (error) {
+    console.log("Error: ", error);
+    return res.json({
+      message: "Error finding Details. Please try again.",
+      success: "false",
+    });
   }
 };
 
@@ -229,4 +263,5 @@ export {
   userIshmtIDControl,
   allPaymentFileControl,
   allIshmtIDControl,
+  userFormDetailControl,
 };

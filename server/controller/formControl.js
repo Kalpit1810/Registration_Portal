@@ -149,10 +149,9 @@ function generateEmailContent(formData) {
 const submitControl = async (req, res) => {
   const formData = req.body;
   const userData = await userModel.findById(formData?.userID);
-  if(userData?.formFilled)
-  {
+  if (userData?.formFilled) {
     console.log("form already filled");
-    return res.json({message:"Form was already filled.", success: "false"});
+    return res.json({ message: "Form was already filled.", success: "false" });
   }
   const { ishmtIDFile, paymentReceipt } = req.files;
   if (ishmtIDFile) {
@@ -166,6 +165,7 @@ const submitControl = async (req, res) => {
         userID: formData?.userID,
       });
       await file1.save();
+      return res.json({ message: "File Uploaded", success: "true" });
     } catch (error) {
       console.log("Error", error);
       return res.json(

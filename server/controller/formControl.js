@@ -39,7 +39,7 @@ const feesControl = async (req, res) => {
     category += "S";
   } else if (formData.profile == "faculty") {
     category += "F";
-  } else if (formData.profile == "industry") {
+  } else if (formData.profile == "industry researcher") {
     category += "I";
   }
 

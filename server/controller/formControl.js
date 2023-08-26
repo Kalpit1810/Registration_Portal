@@ -157,7 +157,7 @@ const submitControl = async (req, res) => {
   if (ishmtIDFile) {
     const ext = ishmtIDFile[0]?.originalname.split(`.`).pop();
 
-    const fileName = formData?.userEmail + "_ISHMT_ID." + ext;
+    const fileName = formData?.email + "_ISHMT_ID." + ext;
     try {
       const file1 = new ishmtFileModel({
         fileName,
@@ -177,7 +177,7 @@ const submitControl = async (req, res) => {
 
   if (paymentReceipt) {
     const ext = paymentReceipt[0].originalname.split(`.`).pop();
-    const fileName = formData?.userEmail + "_payment_recipt." + ext;
+    const fileName = formData?.email + "_payment_recipt." + ext;
 
     try {
       const file1 = new paymentFileModel({

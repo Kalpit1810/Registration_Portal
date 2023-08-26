@@ -19,6 +19,7 @@ app.use("/forget-pass", forgetPassRouter);
 app.use("/form", formRouter);
 app.use("/admin", adminRouter);
 
+// Database connection
 DBConnection();
 
 

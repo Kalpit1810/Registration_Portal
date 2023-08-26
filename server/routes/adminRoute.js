@@ -1,5 +1,5 @@
 import express from "express";
-import {userListControl,userDeleteControl,userDownloadControl, userPaymentFileControl, userIshmtIDControl, allIshmtIDControl, allPaymentFileControl,userFormDetailControl} from "../controller/adminControl.js"
+import {userListControl,userDeleteControl,userDownloadControl, userPaymentFileControl, userIshmtIDControl, allIshmtIDControl, allPaymentFileControl,userFormDetailControl, userVerifiedControl} from "../controller/adminControl.js"
 
 const adminRouter = express.Router();
 
@@ -11,5 +11,6 @@ adminRouter.post("/userIshmtIDFile", userIshmtIDControl);
 adminRouter.post("/PaymentFiles", allPaymentFileControl);
 adminRouter.post("/IshmtIDFiles", allIshmtIDControl);
 adminRouter.post("/userFormDetail", userFormDetailControl);
+adminRouter.post("/changeVerified", userVerifiedControl);
 
 export default adminRouter;

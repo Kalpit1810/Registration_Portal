@@ -16,7 +16,10 @@ const userListControl = async (req, res) => {
 
   try {
     const data = await userModel
-      .find({ isAdmin: "false" }, { userEmail: 1, formFilled: 1, isVerified: 1 })
+      .find(
+        { isAdmin: "false" },
+        { userEmail: 1, formFilled: 1, isVerified: 1 }
+      )
       .sort({ userEmail: 1 });
     console.log("List Fetched Successfully");
     return res.json({ list: data, success: "true" });
@@ -68,6 +71,7 @@ const userDeleteControl = async (req, res) => {
     });
   }
 };
+
 const userDownloadControl = async (req, res) => {
   const token = req.body?.token;
   const userID = jwt.decode(token, process.env.JWT_SECRET);
@@ -128,7 +132,9 @@ const userIshmtIDControl = async (req, res) => {
 
     if (!fileDocument) {
       console.log("File not found");
-      return res.status(404).json({ message: "File not found" });
+      return res
+        .status(404)
+        .json({ message: "File not found", success: "false" });
     }
 
     const fileData = fileDocument?.fileData;
@@ -255,6 +261,27 @@ const userFormDetailControl = async (req, res) => {
   }
 };
 
+const userVerifiedControl = async (req, res) => {
+  const token = req.body?.token;
+  const userID = req.body?.userID;
+  const adminID = jwt.decode(token, process.env.JWT_SECRET);
+  const admin = await userModel.findById(adminID?.id);
+  if (!admin?.isAdmin) {
+    console.log("Unautorized Access!");
+    return res.json({ message: "Access Denied", success: "false" });
+  }
+
+  try {
+    let user = await userModel.findById(userID);
+    await userModel.findByIdAndUpdate(userID, {isVerified:!user.isVerified});
+    res.json({message:"Verification status changed", success:"true"});    
+  } catch (error) {
+    console.log("Error : ",error);
+    res.json({message: "Couldn't change the verification status", success: "false"});
+  }
+
+};
+
 export {
   userListControl,
   userDeleteControl,
@@ -264,4 +291,5 @@ export {
   allPaymentFileControl,
   allIshmtIDControl,
   userFormDetailControl,
+  userVerifiedControl,
 };

@@ -148,9 +148,13 @@ function generateEmailContent(formData) {
 
 const submitControl = async (req, res) => {
   const formData = req.body;
-  console.log(formData);
+  const userData = await userModel.findById(formData?.userID);
+  if(userData?.formFilled)
+  {
+    console.log("form already filled");
+    return res.json({message:"Form was already filled.", success: "false"});
+  }
   const { ishmtIDFile, paymentReceipt } = req.files;
-  // console.log(ishmtIDFile, "--->>");
   if (ishmtIDFile) {
     const ext = ishmtIDFile[0]?.originalname.split(`.`).pop();
 

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const schema = new mongoose.Schema({
   firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
+  lastName: { type: String,  },
   honorific: { type: String, required: true },
   gender: { type: String, required: true },
   birthYear: { type: String, required: true },
@@ -14,16 +14,17 @@ const schema = new mongoose.Schema({
   whatsappNumberCode: { type: String, required: false },
   whatsappNumber: { type: String, required: false },
   paperCount: { type: String, required: true },
-  paper1Id: { type: String, required: true },
+  paper1Id: { type: String, required: false },
   paper2Id: { type: String, required: false },
   profile: { type: String, required: true },
   accompanyingPersons: { type: String, required: true },
   isIshmtMember: { type: String, required: true },
-  ishmtIDno: { type: String},
+  ishmtIDno: { type: String, required: false },
   paymentReferenceNumber: { type: String, required: true, unique: true },
   userID: {type: mongoose.Schema.Types.ObjectId, ref: "users", require: true, unique: true,},
   category: {type: String,  require: true},
   fee: {type: String,  require: true},
+  comment: {type: String, required: false},
   date: { type: Date, default : Date.now },
 });
 

@@ -120,10 +120,10 @@ function generateEmailContent(formData) {
       }</p>
       <p><strong>Country:</strong> ${formData?.country}</p>
       <p><strong>Email:</strong> ${formData?.email}</p>
-      <p><strong>Contact Number:</strong> +${formData?.contactNumberCode}-${
+      <p><strong>Contact Number:</strong> ${formData?.contactNumberCode}-${
     formData?.contactNumber
   }</p>
-      <p><strong>WhatsApp Number:</strong> +${formData?.whatsappNumberCode}-${
+      <p><strong>WhatsApp Number:</strong> ${formData?.whatsappNumberCode}-${
     formData?.whatsappNumber
   }</p>
       <p><strong>Number of Papers:</strong> ${formData?.paperCount}</p>

@@ -16,6 +16,7 @@ const userSignupControl = async (req, res) => {
       console.log("User already exist!");
       return res.json({
         message: `User with email ${userEmail} already exists!`,
+        success: 'false'
       });
     }
 
@@ -29,10 +30,10 @@ const userSignupControl = async (req, res) => {
     await newUser.save();
 
     console.log("User Registered Successfully!!");
-    return res.json({ message: "User Registered Successfully!!" });
+    return res.json({ message: "User Registered Successfully!!", success: "true"});
   } catch (error) {
     console.log("Error: ", error.message);
-    return res.json({ message: "Some error occured please try again!" });
+    return res.json({ message: "Some error occured please try again!", success: 'false' });
   }
 };
 
@@ -46,7 +47,7 @@ const userLoginControl = async (req, res) => {
     if (!user) {
       console.log(`User does't exist!`);
       return res.json({
-        message: `User with email id ${userEmail} doesnot exist!`,
+        message: `User with email id ${userEmail} doesnot exist!`,success: "false"
       });
     }
 
@@ -56,7 +57,7 @@ const userLoginControl = async (req, res) => {
     if (!passwordValid) {
       console.log("password doesn't match!");
       return res.json({
-        message: "Password doesn't match. Recheck Email and Password!",
+        message: "Password doesn't match. Recheck Email and Password!",success: "false"
       });
     }
 
@@ -70,10 +71,11 @@ const userLoginControl = async (req, res) => {
       isAdmin: user?.isAdmin,
       formFilled: user?.formFilled,
       message: "User LoggedIn Successfully!!",
+      success: "true"
     });
   } catch (error) {
     console.log("Error: ", error.message);
-    return res.json({ message: "Some error occured please try again!" });
+    return res.json({ message: "Some error occured please try again!", success: "false" });
   }
 };
 

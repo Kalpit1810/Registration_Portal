@@ -19,15 +19,15 @@ const feesControl = async (req, res) => {
     "Sri Lanka",
   ];
   const categoryFees = {
-    SSM: 6500,
-    SSN: 7200,
-    SFM: 8400,
-    SFN: 9600,
-    SIM: 11000,
-    SIN: 12100,
-    NSN: 16600,
-    NFN: 38180,
-    NIN: 45650,
+    SSM: 6500.0,
+    SSN: 7200.0,
+    SFM: 8400.0,
+    SFN: 9600.0,
+    SIM: 11000.0,
+    SIN: 12100.0,
+    NSN: 16600.0,
+    NFN: 38180.0,
+    NIN: 45650.0,
   };
   if (Saarc.includes(formData?.country)) {
     category += "S";
@@ -52,12 +52,12 @@ const feesControl = async (req, res) => {
   if (category[0] == "S") {
     fee =
       categoryFees[category] *
-        (1 + 0.25 * (Math.max(Number(formData?.paperCount) - 1), 0)) +
+        (1 + 0.25 * Math.max(Number(formData?.paperCount) - 1, 0)) +
       3800 * Number(formData?.accompanyingPersons);
   } else {
     fee =
       categoryFees[category] *
-        (1 + 0.25 * (Math.max(Number(formData?.paperCount) - 1), 0)) +
+        (1 + 0.25 * Math.max(Number(formData?.paperCount) - 1, 0)) +
       14940 * Number(formData?.accompanyingPersons);
   }
 
@@ -70,14 +70,13 @@ const feesControl = async (req, res) => {
   } else {
     fee = fee * 1.18;
   }
+  console.log(fee);
 
   fee = Number(fee.toFixed(0));
   const updatedFormData = {
     category: category,
-    fee: `INR ${fee}`,
+    fee: `${fee}`,
   };
-
-  console.log("category and fee calculated");
   return res.json({ updatedFormData, success: "true" });
 };
 
@@ -111,7 +110,12 @@ function generateEmailContent(formData) {
     <div class="container">
       <h3>Conference Registration Details</h3>
       <p><strong>First Name:</strong> ${formData?.firstName}</p>
-      <p><strong>Last Name:</strong> ${formData?.lastName}</p>
+      <p><strong>Middle Name:</strong> ${
+        formData?.middleName ? formData?.middleName : ""
+      }</p>
+      <p><strong>Last Name:</strong> ${
+        formData?.lastName ? formData?.lastName : ""
+      }</p>
       <p><strong>Honorific:</strong> ${formData?.honorific}</p>
       <p><strong>Gender:</strong> ${formData?.gender}</p>
       <p><strong>Year of Birth:</strong> ${formData?.birthYear}</p>
@@ -123,25 +127,34 @@ function generateEmailContent(formData) {
       <p><strong>Contact Number:</strong> ${formData?.contactNumberCode}-${
     formData?.contactNumber
   }</p>
-      <p><strong>WhatsApp Number:</strong> ${formData?.whatsappNumberCode}-${
-    formData?.whatsappNumber
-  }</p>
+      <p><strong>WhatsApp Number:</strong> ${
+        formData?.whatsappNumberCode ? formData?.whatsappNumberCode : ""
+      }-${formData?.whatsappNumber ? formData?.whatsappNumber : ""}</p>
       <p><strong>Number of Papers:</strong> ${formData?.paperCount}</p>
-      <p><strong>Paper #1 ID:</strong> ${formData?.paper1Id}</p>
+      <p><strong>Submission ID of Paper #1:</strong> ${formData?.paper1Id}</p>
       ${
         formData?.paperCount === "2"
-          ? `<p><strong>Paper #2 ID:</strong> ${formData?.paper2Id}</p>`
+          ? `<p><strong>Submission ID of Paper #2:</strong> ${formData?.paper2Id}</p>`
           : ""
       }
       <p><strong>Profile:</strong> ${formData?.profile}</p>
       <p><strong>Accompanying Persons:</strong> ${
         formData?.accompanyingPersons
       }</p>
-      <p><strong>ISHMT Member:</strong> ${formData?.isIshmtMember}</p>
+      <p><strong>Is ISHMT Member:</strong> ${formData?.isIshmtMember}</p>
+      ${
+        formData?.isIshmtMember == "Yes"
+          ? `<p><strong>ISHMT ID Number:</strong> ${formData?.ishmtIDno}`
+          : ""
+      }</p>
       <p><strong>Payment Reference Number:</strong> ${
         formData?.paymentReferenceNumber
       }</p>
-      <p><strong>Comment:</strong> ${formData?.comment}</p>
+      <p><strong>Category:</strong> ${formData?.category}</p>
+      <p><strong>Amount Payable:</strong> ${formData?.fee}</p>
+      <p><strong>Comment:</strong> ${
+        formData?.comment ? formData?.comment : ""
+      }</p>
     </div>
   `;
 }
@@ -224,22 +237,20 @@ const submitControl = async (req, res) => {
   await userModel.findByIdAndUpdate(formData?.userID, { formFilled: true });
 
   const user = await userModel.findById(formData?.userID);
-  console.log(user, "-->");
   const userMail = user?.userEmail;
   const senderEmail = "kalpit1018@gmail.com";
-  const senderPassword = "qipcasvogayahqqf";
 
   const transporter = nodemailer.createTransport({
-    service: "gmail",
+    service: "outlook",
     auth: {
-      user: senderEmail,
-      pass: senderPassword,
+      user: "kalpit_2101cs34@iitp.ac.in",
+      pass: "Kal@2002",
     },
   });
 
   const mailOptions = {
-    from: senderEmail,
-    to: userMail,
+    from: "kalpit_2101cs34@iitp.ac.in",
+    to: "kalpit1018@gmail.com",
     subject: "Your Conference Registration Details",
     html: generateEmailContent(formData),
   };
@@ -263,10 +274,20 @@ const submitControl = async (req, res) => {
     });
   } catch (err) {
     console.log("Error:", err);
+    await ishmtFileModel.findOneAndDelete({
+      userID: formData?.userID,
+    });
+
+    await paymentFileModel.findOneAndDelete({
+      userID: formData?.userID,
+    });
+    await formModel.findOneAndDelete({
+      userID: formData?.userID,
+    });
+    await userModel.findByIdAndUpdate(formData?.userID, { formFilled: false });
     return res.status(500).json({
       message: `An error occurred. Please try again.`,
       success: false,
-      otpToken: "",
     });
   }
 

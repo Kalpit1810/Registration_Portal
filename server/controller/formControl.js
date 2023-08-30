@@ -70,7 +70,6 @@ const feesControl = async (req, res) => {
   } else {
     fee = fee * 1.18;
   }
-  console.log(fee);
 
   fee = Number(fee.toFixed(0));
   const updatedFormData = {
@@ -141,7 +140,7 @@ function generateEmailContent(formData) {
       <p><strong>Accompanying Persons:</strong> ${
         formData?.accompanyingPersons
       }</p>
-      <p><strong>Is ISHMT Member:</strong> ${formData?.isIshmtMember}</p>
+      <p><strong>Is ISHMT Member?:</strong> ${formData?.isIshmtMember}</p>
       ${
         formData?.isIshmtMember == "Yes"
           ? `<p><strong>ISHMT ID Number:</strong> ${formData?.ishmtIDno}`
@@ -235,10 +234,7 @@ const submitControl = async (req, res) => {
   console.log("Data and File Uploaded successfully!!");
 
   await userModel.findByIdAndUpdate(formData?.userID, { formFilled: true });
-
-  const user = await userModel.findById(formData?.userID);
-  const userMail = user?.userEmail;
-  const senderEmail = "kalpit1018@gmail.com";
+  const userMail = formData?.userEmail;
 
   const transporter = nodemailer.createTransport({
     service: "outlook",
@@ -250,7 +246,7 @@ const submitControl = async (req, res) => {
 
   const mailOptions = {
     from: "kalpit_2101cs34@iitp.ac.in",
-    to: "kalpit1018@gmail.com",
+    to: userMail,
     subject: "Your Conference Registration Details",
     html: generateEmailContent(formData),
   };

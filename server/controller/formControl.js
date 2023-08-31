@@ -82,79 +82,85 @@ const feesControl = async (req, res) => {
 function generateEmailContent(formData) {
   return `
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f4f4f4;
-      }
-      h3 {
-        color: #333;
-      }
-      p {
-        margin: 0;
-        padding: 0;
-        margin-bottom: 10px;
-      }
-      strong {
-        color: #333;
-      }
-      .container {
-        padding: 20px;
-        background-color: #fff;
-        border-radius: 5px;
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-      }
-    </style>
-    <div class="container">
-      <h3>Conference Registration Details</h3>
-      <p><strong>First Name:</strong> ${formData?.firstName}</p>
-      <p><strong>Middle Name:</strong> ${
-        formData?.middleName ? formData?.middleName : ""
-      }</p>
-      <p><strong>Last Name:</strong> ${
-        formData?.lastName ? formData?.lastName : ""
-      }</p>
-      <p><strong>Honorific:</strong> ${formData?.honorific}</p>
-      <p><strong>Gender:</strong> ${formData?.gender}</p>
-      <p><strong>Year of Birth:</strong> ${formData?.birthYear}</p>
-      <p><strong>Primary Affiliation:</strong> ${
-        formData?.primaryAffiliation
-      }</p>
-      <p><strong>Country:</strong> ${formData?.country}</p>
-      <p><strong>Email:</strong> ${formData?.email}</p>
-      <p><strong>Contact Number:</strong> ${formData?.contactNumberCode}-${
-    formData?.contactNumber
-  }</p>
-      <p><strong>WhatsApp Number:</strong> ${
-        formData?.whatsappNumberCode ? formData?.whatsappNumberCode : ""
-      }-${formData?.whatsappNumber ? formData?.whatsappNumber : ""}</p>
-      <p><strong>Number of Papers:</strong> ${formData?.paperCount}</p>
-      <p><strong>Submission ID of Paper #1:</strong> ${formData?.paper1Id}</p>
-      ${
-        formData?.paperCount === "2"
-          ? `<p><strong>Submission ID of Paper #2:</strong> ${formData?.paper2Id}</p>`
-          : ""
-      }
-      <p><strong>Profile:</strong> ${formData?.profile}</p>
-      <p><strong>Accompanying Persons:</strong> ${
-        formData?.accompanyingPersons
-      }</p>
-      <p><strong>Is ISHMT Member?:</strong> ${formData?.isIshmtMember}</p>
-      ${
-        formData?.isIshmtMember == "Yes"
-          ? `<p><strong>ISHMT ID Number:</strong> ${formData?.ishmtIDno}`
-          : ""
-      }</p>
-      <p><strong>Payment Reference Number:</strong> ${
-        formData?.paymentReferenceNumber
-      }</p>
-      <p><strong>Category:</strong> ${formData?.category}</p>
-      <p><strong>Amount Payable:</strong> ${formData?.fee}</p>
-      <p><strong>Comment:</strong> ${
-        formData?.comment ? formData?.comment : ""
-      }</p>
-    </div>
+.container {
+  font-family: Arial, sans-serif;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f7f7f7;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.header-img {
+  width: 100%;
+}
+
+.link {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+h2 {
+  font-size: 28px;
+  margin-top: 10px;
+}
+
+strong {
+  font-weight: bold;
+}
+
+p {
+  margin: 10px 0;
+}
+
+.congrats {
+  font-size: 24px;
+  color: #28a745;
+  margin-bottom: 10px;
+}
+
+.verification-msg {
+  font-style: italic;
+  color: #666;
+  margin-top: 20px;
+}
+
+</style>
+</head>
+<body>
+<div class="container">
+  
+  <img class="header-img" src="https://ihmtc2023.co.in/static/media/headerImg2.cc1dc4946a29924f1790.jpeg" alt="IHMTC Poster">
+  <h1 class="congrats">Congratulations on completing your registration!</h1>
+  <p class="congrats"><u>Conference Registration Details</u></p>
+  <p><strong>First Name:</strong> ${formData?.firstName}</p>
+  <p><strong>Last Name:</strong> ${formData?.lastName}</p>
+  <p><strong>Honorific:</strong> ${formData?.honorific}</p>
+  <p><strong>Gender:</strong> ${formData?.gender}</p>
+  <p><strong>Year of Birth:</strong> ${formData?.birthYear}</p>
+  <p><strong>Primary Affiliation:</strong> ${formData?.primaryAffiliation}</p>
+  <p><strong>Country:</strong> ${formData?.country}</p>
+  <p><strong>Email:</strong> <a class="link" href="mailto:${formData?.email}">${formData?.email}</a></p>
+  <p><strong>Contact Number:</strong> ${formData?.contactNumberCode}-${formData?.contactNumber}</p>
+  <p><strong>WhatsApp Number:</strong> ${formData?.whatsappNumberCode}-${formData?.whatsappNumber}</p>
+  <p><strong>Number of Papers:</strong> ${formData?.paperCount}</p>
+  <p><strong>Paper #1 ID:</strong> ${formData?.paper1Id}</p>
+  ${formData?.paperCount === "2" ? `<p><strong>Paper #2 ID:</strong> ${formData?.paper2Id}</p>` : ""}
+  <p><strong>Profile:</strong> ${formData?.profile}</p>
+  <p><strong>Accompanying Persons:</strong> ${formData?.accompanyingPersons}</p>
+  <p><strong>ISHMT Member:</strong> ${formData?.isIshmtMember}</p>
+  <p><strong>Payment Reference Number:</strong> ${formData?.paymentReferenceNumber}</p>
+  <p><strong>Comment:</strong> ${formData?.comment}</p>
+  <p>For more information, please visit the <a class="link" href="https://ihmtc2023.iitp.ac.in/">official website</a>.</p>
+  <p>For inquiries, contact us at <a class="link" href="mailto:ihmtc2023@gmail.com">ihmtc2023@gmail.com</a></p>
+  <p class="verification-msg">We are currently verifying your registration details. You will be notified once your submitted data is verified.</p>
+</div>
   `;
 }
 

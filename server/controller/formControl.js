@@ -140,25 +140,57 @@ p {
   
   <img class="header-img" src="https://ihmtc2023.co.in/static/media/headerImg2.cc1dc4946a29924f1790.jpeg" alt="IHMTC Poster">
   <h1 class="congrats">Congratulations on completing your registration!</h1>
-  <p class="congrats"><u>Conference Registration Details</u></p>
-  <p><strong>First Name:</strong> ${formData?.firstName}</p>
-  <p><strong>Last Name:</strong> ${formData?.lastName}</p>
-  <p><strong>Honorific:</strong> ${formData?.honorific}</p>
-  <p><strong>Gender:</strong> ${formData?.gender}</p>
-  <p><strong>Year of Birth:</strong> ${formData?.birthYear}</p>
-  <p><strong>Primary Affiliation:</strong> ${formData?.primaryAffiliation}</p>
-  <p><strong>Country:</strong> ${formData?.country}</p>
-  <p><strong>Email:</strong> <a class="link" href="mailto:${formData?.email}">${formData?.email}</a></p>
-  <p><strong>Contact Number:</strong> ${formData?.contactNumberCode}-${formData?.contactNumber}</p>
-  <p><strong>WhatsApp Number:</strong> ${formData?.whatsappNumberCode}-${formData?.whatsappNumber}</p>
-  <p><strong>Number of Papers:</strong> ${formData?.paperCount}</p>
-  <p><strong>Paper #1 ID:</strong> ${formData?.paper1Id}</p>
-  ${formData?.paperCount === "2" ? `<p><strong>Paper #2 ID:</strong> ${formData?.paper2Id}</p>` : ""}
-  <p><strong>Profile:</strong> ${formData?.profile}</p>
-  <p><strong>Accompanying Persons:</strong> ${formData?.accompanyingPersons}</p>
-  <p><strong>ISHMT Member:</strong> ${formData?.isIshmtMember}</p>
-  <p><strong>Payment Reference Number:</strong> ${formData?.paymentReferenceNumber}</p>
-  <p><strong>Comment:</strong> ${formData?.comment}</p>
+      <h3>Conference Registration Details</h3>
+      <p><strong>First Name:</strong> ${formData?.firstName}</p>
+       ${
+         formData?.middleName ?
+         `<p><strong>Middle Name:</strong>${formData?.middleName}</p>`:""
+       }
+       ${
+         formData?.lastName ?
+         `<p><strong>Last Name:</strong>${formData?.lastName}</p>`:""
+       }
+      <p><strong>Honorific:</strong> ${formData?.honorific}</p>
+      <p><strong>Gender:</strong> ${formData?.gender}</p>
+      <p><strong>Year of Birth:</strong> ${formData?.birthYear}</p>
+      <p><strong>Primary Affiliation:</strong> ${
+        formData?.primaryAffiliation
+      }</p>
+      <p><strong>Country:</strong> ${formData?.country}</p>
+      <p><strong>Email:</strong> ${formData?.email}</p>
+      <p><strong>Contact Number:</strong> ${formData?.contactNumberCode}-${
+    formData?.contactNumber
+  }</p>
+      ${
+        formData?.whatsappNumberCode ?
+        `<p><strong>WhatsApp Number:</strong> ${formData?.whatsappNumberCode}-${formData?.whatsappNumber} </p>`:""
+      }
+      <p><strong>Number of Papers:</strong> ${formData?.paperCount}</p>
+      ${
+        (formData?.paperCount === "1" || formData?.paperCount === "2") ?
+        `<p><strong>Submission ID of Paper #1:</strong> ${formData?.paper1Id}</p>`:''
+      }
+      ${
+        formData?.paperCount === "2" ?
+        `<p><strong>Submission ID of Paper #2:</strong> ${formData?.paper2Id}</p>`:""
+      }
+      <p><strong>Profile:</strong> ${formData?.profile}</p>
+      <p><strong>Accompanying Persons:</strong> ${
+        formData?.accompanyingPersons
+      }</p>
+      <p><strong>Is ISHMT Member? :</strong> ${formData?.isIshmtMember}</p>
+      ${
+        formData?.isIshmtMember === "Yes" ?
+        `<p><strong>ISHMT ID Number:</strong> ${formData?.ishmtIDno}</p>`: ""
+      }
+      <p><strong>Payment Reference Number:</strong> ${
+        formData?.paymentReferenceNumber
+      }</p>
+      <p><strong>Category:</strong> ${formData?.category}</p>
+      <p><strong>Amount Payable:</strong> ${formData?.fee}</p>
+       ${
+        formData?.comment ? `<p><strong>Comment:</strong></p> ${formData?.comment}`:""
+      }
   <p>For more information, please visit the <a class="link" href="https://ihmtc2023.iitp.ac.in/">official website</a>.</p>
   <p>For inquiries, contact us at <a class="link" href="mailto:ihmtc2023@gmail.com">ihmtc2023@gmail.com</a></p>
   <p class="verification-msg">We are currently verifying your registration details. You will be notified once your submitted data is verified.</p>
@@ -168,80 +200,80 @@ p {
 
 const submitControl = async (req, res) => {
   const formData = req.body;
-  const userData = await userModel.findById(formData?.userID);
-  if (userData?.formFilled) {
-    console.log("form already filled");
-    return res.json({ message: "Form was already filled.", success: "false" });
-  }
-  const { ishmtIDFile, paymentReceipt } = req.files;
-  if (ishmtIDFile) {
-    const ext = ishmtIDFile[0]?.originalname.split(`.`).pop();
+  // const userData = await userModel.findById(formData?.userID);
+  // if (userData?.formFilled) {
+  //   console.log("form already filled");
+  //   return res.json({ message: "Form was already filled.", success: "false" });
+  // }
+  // const { ishmtIDFile, paymentReceipt } = req.files;
+  // if (ishmtIDFile) {
+  //   const ext = ishmtIDFile[0]?.originalname.split(`.`).pop();
 
-    const fileName = formData?.email + "_ISHMT_ID." + ext;
-    try {
-      const file1 = new ishmtFileModel({
-        fileName,
-        fileData: ishmtIDFile[0]?.buffer,
-        userID: formData?.userID,
-      });
-      await file1.save();
-      return res.json({ message: "File Uploaded", success: "true" });
-    } catch (error) {
-      console.log("Error", error);
-      return res.json(
-        { error },
-        { message: "Error Uploading File", success: "false" }
-      );
-    }
-  }
+  //   const fileName = formData?.email + "_ISHMT_ID." + ext;
+  //   try {
+  //     const file1 = new ishmtFileModel({
+  //       fileName,
+  //       fileData: ishmtIDFile[0]?.buffer,
+  //       userID: formData?.userID,
+  //     });
+  //     await file1.save();
+  //     return res.json({ message: "File Uploaded", success: "true" });
+  //   } catch (error) {
+  //     console.log("Error", error);
+  //     return res.json(
+  //       { error },
+  //       { message: "Error Uploading File", success: "false" }
+  //     );
+  //   }
+  // }
 
-  if (paymentReceipt) {
-    const ext = paymentReceipt[0].originalname.split(`.`).pop();
-    const fileName = formData?.email + "_payment_recipt." + ext;
+  // if (paymentReceipt) {
+  //   const ext = paymentReceipt[0].originalname.split(`.`).pop();
+  //   const fileName = formData?.email + "_payment_recipt." + ext;
 
-    try {
-      const file1 = new paymentFileModel({
-        fileName,
-        fileData: paymentReceipt[0]?.buffer,
-        userID: formData?.userID,
-      });
-      await file1.save();
-    } catch (error) {
-      await ishmtFileModel?.findOneAndDelete({
-        userID: req.body?.userID,
-      });
-      console.log("Error", error);
-      return res.json(
-        { error },
-        { message: "Error Uploading File" },
-        { success: "false" }
-      );
-    }
-  }
+  //   try {
+  //     const file1 = new paymentFileModel({
+  //       fileName,
+  //       fileData: paymentReceipt[0]?.buffer,
+  //       userID: formData?.userID,
+  //     });
+  //     await file1.save();
+  //   } catch (error) {
+  //     await ishmtFileModel?.findOneAndDelete({
+  //       userID: req.body?.userID,
+  //     });
+  //     console.log("Error", error);
+  //     return res.json(
+  //       { error },
+  //       { message: "Error Uploading File" },
+  //       { success: "false" }
+  //     );
+  //   }
+  // }
 
-  try {
-    const file1 = new formModel(formData);
-    await file1.save();
-  } catch (error) {
-    await ishmtFileModel.findOneAndDelete({
-      userID: formData?.userID,
-    });
+  // try {
+  //   const file1 = new formModel(formData);
+  //   await file1.save();
+  // } catch (error) {
+  //   await ishmtFileModel.findOneAndDelete({
+  //     userID: formData?.userID,
+  //   });
 
-    await paymentFileModel.findOneAndDelete({
-      userID: formData?.userID,
-    });
+  //   await paymentFileModel.findOneAndDelete({
+  //     userID: formData?.userID,
+  //   });
 
-    console.log("Error", error);
-    return res.json({
-      error,
-      message: "Error Uploading form Data",
-      success: "false",
-    });
-  }
+  //   console.log("Error", error);
+  //   return res.json({
+  //     error,
+  //     message: "Error Uploading form Data",
+  //     success: "false",
+  //   });
+  // }
 
-  console.log("Data and File Uploaded successfully!!");
+  // console.log("Data and File Uploaded successfully!!");
 
-  await userModel.findByIdAndUpdate(formData?.userID, { formFilled: true });
+  // await userModel.findByIdAndUpdate(formData?.userID, { formFilled: true });
   const userMail = formData?.email;
 
   const transporter = nodemailer.createTransport({

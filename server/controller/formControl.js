@@ -168,80 +168,80 @@ p {
 
 const submitControl = async (req, res) => {
   const formData = req.body;
-  // const userData = await userModel.findById(formData?.userID);
-  // if (userData?.formFilled) {
-  //   console.log("form already filled");
-  //   return res.json({ message: "Form was already filled.", success: "false" });
-  // }
-  // const { ishmtIDFile, paymentReceipt } = req.files;
-  // if (ishmtIDFile) {
-  //   const ext = ishmtIDFile[0]?.originalname.split(`.`).pop();
+  const userData = await userModel.findById(formData?.userID);
+  if (userData?.formFilled) {
+    console.log("form already filled");
+    return res.json({ message: "Form was already filled.", success: "false" });
+  }
+  const { ishmtIDFile, paymentReceipt } = req.files;
+  if (ishmtIDFile) {
+    const ext = ishmtIDFile[0]?.originalname.split(`.`).pop();
 
-  //   const fileName = formData?.email + "_ISHMT_ID." + ext;
-  //   try {
-  //     const file1 = new ishmtFileModel({
-  //       fileName,
-  //       fileData: ishmtIDFile[0]?.buffer,
-  //       userID: formData?.userID,
-  //     });
-  //     await file1.save();
-  //     return res.json({ message: "File Uploaded", success: "true" });
-  //   } catch (error) {
-  //     console.log("Error", error);
-  //     return res.json(
-  //       { error },
-  //       { message: "Error Uploading File", success: "false" }
-  //     );
-  //   }
-  // }
+    const fileName = formData?.email + "_ISHMT_ID." + ext;
+    try {
+      const file1 = new ishmtFileModel({
+        fileName,
+        fileData: ishmtIDFile[0]?.buffer,
+        userID: formData?.userID,
+      });
+      await file1.save();
+      return res.json({ message: "File Uploaded", success: "true" });
+    } catch (error) {
+      console.log("Error", error);
+      return res.json(
+        { error },
+        { message: "Error Uploading File", success: "false" }
+      );
+    }
+  }
 
-  // if (paymentReceipt) {
-  //   const ext = paymentReceipt[0].originalname.split(`.`).pop();
-  //   const fileName = formData?.email + "_payment_recipt." + ext;
+  if (paymentReceipt) {
+    const ext = paymentReceipt[0].originalname.split(`.`).pop();
+    const fileName = formData?.email + "_payment_recipt." + ext;
 
-  //   try {
-  //     const file1 = new paymentFileModel({
-  //       fileName,
-  //       fileData: paymentReceipt[0]?.buffer,
-  //       userID: formData?.userID,
-  //     });
-  //     await file1.save();
-  //   } catch (error) {
-  //     await ishmtFileModel?.findOneAndDelete({
-  //       userID: req.body?.userID,
-  //     });
-  //     console.log("Error", error);
-  //     return res.json(
-  //       { error },
-  //       { message: "Error Uploading File" },
-  //       { success: "false" }
-  //     );
-  //   }
-  // }
+    try {
+      const file1 = new paymentFileModel({
+        fileName,
+        fileData: paymentReceipt[0]?.buffer,
+        userID: formData?.userID,
+      });
+      await file1.save();
+    } catch (error) {
+      await ishmtFileModel?.findOneAndDelete({
+        userID: req.body?.userID,
+      });
+      console.log("Error", error);
+      return res.json(
+        { error },
+        { message: "Error Uploading File" },
+        { success: "false" }
+      );
+    }
+  }
 
-  // try {
-  //   const file1 = new formModel(formData);
-  //   await file1.save();
-  // } catch (error) {
-  //   await ishmtFileModel.findOneAndDelete({
-  //     userID: formData?.userID,
-  //   });
+  try {
+    const file1 = new formModel(formData);
+    await file1.save();
+  } catch (error) {
+    await ishmtFileModel.findOneAndDelete({
+      userID: formData?.userID,
+    });
 
-  //   await paymentFileModel.findOneAndDelete({
-  //     userID: formData?.userID,
-  //   });
+    await paymentFileModel.findOneAndDelete({
+      userID: formData?.userID,
+    });
 
-  //   console.log("Error", error);
-  //   return res.json({
-  //     error,
-  //     message: "Error Uploading form Data",
-  //     success: "false",
-  //   });
-  // }
+    console.log("Error", error);
+    return res.json({
+      error,
+      message: "Error Uploading form Data",
+      success: "false",
+    });
+  }
 
-  // console.log("Data and File Uploaded successfully!!");
+  console.log("Data and File Uploaded successfully!!");
 
-  // await userModel.findByIdAndUpdate(formData?.userID, { formFilled: true });
+  await userModel.findByIdAndUpdate(formData?.userID, { formFilled: true });
   const userMail = formData?.email;
 
   const transporter = nodemailer.createTransport({
@@ -251,21 +251,6 @@ const submitControl = async (req, res) => {
       pass: process.env.PASS_EMAIL,
     },
   });
-
-
-//   const transporter = nodemailer.createTransport({
-//     host: "smtp-mail.outlook.com", // hostname
-//     secureConnection: false, // TLS requires secureConnection to be false
-//     port: 587, // port for secure SMTP
-//     auth: {
-//       user: "ihmtc2023@iitp.ac.in",
-//       pass: process.env.PASS_EMAIL,
-//     },
-//     tls: {
-//         ciphers:'SSLv3'
-//     }
-// });
-
   const mailOptions = {
     from: "ihmtc2023@iitp.ac.in",
     to: userMail,

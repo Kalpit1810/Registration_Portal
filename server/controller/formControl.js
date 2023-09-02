@@ -3,6 +3,8 @@ import { paymentFileModel } from "../models/PaymentFile.js";
 import { formModel } from "../models/Form.js";
 import { userModel } from "../models/Users.js";
 import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+dotenv.config();
 
 const feesControl = async (req, res) => {
   const formData = req.body;
@@ -234,13 +236,13 @@ const submitControl = async (req, res) => {
   console.log("Data and File Uploaded successfully!!");
 
   await userModel.findByIdAndUpdate(formData?.userID, { formFilled: true });
-  const userMail = formData?.userEmail;
+  const userMail = formData?.email;
 
   const transporter = nodemailer.createTransport({
     service: "outlook",
     auth: {
       user: "kalpit_2101cs34@iitp.ac.in",
-      pass: "Kal@2002",
+      pass: process.env.PASS,
     },
   });
 
@@ -258,14 +260,12 @@ const submitControl = async (req, res) => {
         return res.status(500).json({
           message: `Couldn't send OTP. Please try again.`,
           success: false,
-          otpToken: "",
         });
       }
       console.log("Email sent:", info?.response);
       return res.json({
         message: `OTP sent to your email id ${userMail}`,
         success: true,
-        // otpToken,
       });
     });
   } catch (err) {

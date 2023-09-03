@@ -4,6 +4,9 @@ import { paymentFileModel } from "../models/PaymentFile.js";
 import { formModel } from "../models/Form.js";
 import jwt from "jsonwebtoken";
 import archiver from "archiver";
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+dotenv.config();
 const userListControl = async (req, res) => {
   const token = req.body?.token;
   const userID = jwt.decode(token, process.env.JWT_SECRET);
@@ -273,15 +276,118 @@ const userVerifiedControl = async (req, res) => {
 
   try {
     let user = await userModel.findById(userID);
-    await userModel.findByIdAndUpdate(userID, {isVerified:!user.isVerified});
-    res.json({message:"Verification status changed", success:"true"});    
+    await userModel.findByIdAndUpdate(userID, { isVerified: !user.isVerified });
+    res.json({
+      message: "Verification status changed",
+      success: "true",
+      isVerified: !user.isVerified,
+    });
   } catch (error) {
-    console.log("Error : ",error);
-    res.json({message: "Couldn't change the verification status", success: "false"});
+    console.log("Error : ", error);
+    res.json({
+      message: "Couldn't change the verification status",
+      success: "false",
+    });
   }
-
 };
 
+function generateEmailContent() {
+  return `
+    <style>
+.container {
+  font-family: Arial, sans-serif;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f7f7f7;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.link {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+h3 {
+  font-size: 28px;
+  margin-top: 10px;
+}
+
+strong {
+  font-weight: bold;
+}
+
+p {
+  margin: 10px 0;
+}
+
+
+</style>
+</head>
+<body>
+<div class="container">
+  
+  <h3>Congratulations!!<br><br> Your registration for IHMTC 2023 has been verified. </h3>
+  <p>For more information, please visit the <a class="link" href="https://ihmtc2023.iitp.ac.in/">official website</a>.</p>
+  <p>For further queries, contact us at <a class="link" href="mailto:ihmtc2023@gmail.com">ihmtc2023@gmail.com</a></p>
+  </div>
+  `;
+}
+
+const userVerificationEmail = async (req, res) => {
+  const token = req.body?.token;
+  const userID = req.body?.userID;
+  const adminID = jwt.decode(token, process.env.JWT_SECRET);
+  const admin = await userModel.findById(adminID?.id);
+  const user = await userModel.findById(userID);
+  if (!admin?.isAdmin) {
+    console.log("Unautorized Access!");
+    return res.json({ message: "Access Denied", success: "false" });
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: "outlook",
+    auth: {
+      user: "ihmtc2023@iitp.ac.in",
+      pass: process.env.PASS_EMAIL,
+    },
+  });
+  const mailOptions = {
+    from: "ihmtc2023@iitp.ac.in",
+    to: user.userEmail,
+    subject: "IHMTC 2023 Verification",
+    html: generateEmailContent(),
+  };
+
+  try {
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log("Error sending email:", error);
+        return res.json({
+          message: `Error sending email.`,
+          success: false,
+        });
+      }
+      console.log("Email sent:", info?.response);
+      return res.json({
+        message: `Vreification email sent to ${user.userEmail}`,
+        success: true,
+      });
+    });
+  } catch (err) {
+    console.log("Error:", err);
+    return res.json({
+      message: `Error sending email.`,
+      success: false,
+    });
+  }
+};
 export {
   userListControl,
   userDeleteControl,
@@ -292,4 +398,5 @@ export {
   allIshmtIDControl,
   userFormDetailControl,
   userVerifiedControl,
+  userVerificationEmail,
 };

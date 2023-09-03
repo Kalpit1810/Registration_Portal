@@ -296,13 +296,13 @@ const submitControl = async (req, res) => {
         console.log("Error sending email:", error);
         return res.json({
           message: `Error sending email.`,
-          success: false,
+          success: "false",
         });
       }
       console.log("Email sent:", info?.response);
       return res.json({
         message: `Registration Details sent to ${userMail}`,
-        success: true,
+        success: "true",
       });
     });
   } catch (err) {

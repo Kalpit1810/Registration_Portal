@@ -371,20 +371,20 @@ const userVerificationEmail = async (req, res) => {
         console.log("Error sending email:", error);
         return res.json({
           message: `Error sending email.`,
-          success: false,
+          success: "false",
         });
       }
       console.log("Email sent:", info?.response);
       return res.json({
         message: `Vreification email sent to ${user.userEmail}`,
-        success: true,
+        success: "true",
       });
     });
   } catch (err) {
     console.log("Error:", err);
     return res.json({
       message: `Error sending email.`,
-      success: false,
+      success: "false",
     });
   }
 };

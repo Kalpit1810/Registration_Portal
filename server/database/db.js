@@ -9,8 +9,8 @@ const DBConnection = async () => {
   const MONGO_URI = process.env.MONGODB_URL;
 
   try {
-    // await mongoose.connect(MONGO_URI, { useNewUrlParser: true });
-    await mongoose.connect(`mongodb://${server}/${database}`, { useNewUrlParser: true });
+    await mongoose.connect(MONGO_URI, { useNewUrlParser: true });
+    // await mongoose.connect(`mongodb://${server}/${database}`, { useNewUrlParser: true });
     console.log("DB Connected Successfully!!");
   } catch (err) {
     console.log("Error Connecting Database", err.message);

@@ -24,15 +24,15 @@ const sendOtpControl = async (req, res) => {
     });
 
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      service: "outlook",
       auth: {
-        user: "kalpit1018@gmail.com",
-        pass: "qipcasvogayahqqf",
+        user: "ihmtc2023@iitp.ac.in",
+        pass: process.env.PASS_EMAIL,
       },
     });
 
     const mailOptions = {
-      from: "kalpit1018@gmail.com",
+      from: "ihmtc2023@iitp.ac.in",
       to: userEmail,
       subject: "Your OTP code",
       html: `<h3> Your OTP is ${otp}. Enter this OTP to change password. This OTP will expire in 5 mins.</h3>`,

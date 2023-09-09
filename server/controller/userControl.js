@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { userModel } from "../models/Users.js";
 import dotenv from "dotenv";
+import { formModel } from "../models/Form.js";
 
 dotenv.config();
 
@@ -42,40 +43,40 @@ const userSignupControl = async (req, res) => {
     });
   }
 };
-
 const userDetailsDownloadControl = async (req, res) => {
   const token = req.body?.token;
   const email = req.body.email;
-  // console.log(email);
+
   try {
     const userID = jwt.decode(token, process.env.JWT_SECRET);
     const user = await userModel.findById(userID?.id);
-    // console.log(user);
+
     if (!user) {
-      
-      return res.json({
+      return res.status(404).json({
         message: "User Not found",
-        success: "false",
+        success: false,
       });
-      
     }
+
     if (user.userEmail !== email) {
-      console.log("Unautorized Access!");
-      return res.json({
-        message: "User Details Not found",
-        success: "false",
-      }); 
+      console.log("Unauthorized Access!");
+      return res.status(401).json({
+        message: "Unauthorized Access",
+        success: false,
+      });
     }
+
     const usersData = await formModel.find({}).sort({ fullName: 1 });
-    return res.json({ usersData, success: "true" });
+    return res.status(200).json({ usersData, success: true });
   } catch (error) {
-    console.log("Error: ", error.message);
-    return res.json({
-      message: "Some error occured please try again!",
-      success: "false",
+    console.error("Error: ", error.message);
+    return res.status(500).json({
+      message: "Some error occurred, please try again!",
+      success: false,
     });
   }
 };
+
 
 const userLoginControl = async (req, res) => {
   const { userEmail, userPassword } = req.body;

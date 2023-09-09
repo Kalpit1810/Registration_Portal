@@ -187,7 +187,7 @@ p {
         formData?.paymentReferenceNumber
       }</p>
       <p><strong>Category:</strong> ${formData?.category}</p>
-      <p><strong>Amount Payable:</strong> ${formData?.fee}</p>
+      <p><strong>Fee Paid:</strong> ${formData?.fee}</p>
        ${
         formData?.comment ? `<p><strong>Comment:</strong></p> ${formData?.comment}`:""
       }

@@ -7,7 +7,7 @@ dotenv.config();
 
 const userSignupControl = async (req, res) => {
   const { userEmail, userPassword } = req.body;
-
+  // console.log(userEmail);
   try {
     const user1 = await userModel.findOne({ userEmail });
 
@@ -16,7 +16,7 @@ const userSignupControl = async (req, res) => {
       console.log("User already exist!");
       return res.json({
         message: `User with email ${userEmail} already exists!`,
-        success: 'false'
+        success: "false",
       });
     }
 
@@ -30,27 +30,51 @@ const userSignupControl = async (req, res) => {
     await newUser.save();
 
     console.log("User Registered Successfully!!");
-    return res.json({ message: "User Registered Successfully!!", success: "true"});
+    return res.json({
+      message: "User Registered Successfully!!",
+      success: "true",
+    });
   } catch (error) {
     console.log("Error: ", error.message);
-    return res.json({ message: "Some error occured please try again!", success: 'false' });
+    return res.json({
+      message: "Some error occured please try again!",
+      success: "false",
+    });
   }
 };
 
 const userDetailsDownloadControl = async (req, res) => {
   const token = req.body?.token;
-  const email = req.body?.email;
-  const userID = jwt.decode(token, process.env.JWT_SECRET);
-  const user = await userModel.findById(userID?.id);
-  if (!user) {
-    if(user.userEmail!==email)
-    {
-      console.log("Unautorized Access!");
-      return res.json({ message: "User Details Not found", success: "false" });
+  const email = req.body.email;
+  // console.log(email);
+  try {
+    const userID = jwt.decode(token, process.env.JWT_SECRET);
+    const user = await userModel.findById(userID?.id);
+    // console.log(user);
+    if (!user) {
+      
+      return res.json({
+        message: "User Not found",
+        success: "false",
+      });
+      
     }
+    if (user.userEmail !== email) {
+      console.log("Unautorized Access!");
+      return res.json({
+        message: "User Details Not found",
+        success: "false",
+      }); 
+    }
+    const usersData = await formModel.find({}).sort({ fullName: 1 });
+    return res.json({ usersData, success: "true" });
+  } catch (error) {
+    console.log("Error: ", error.message);
+    return res.json({
+      message: "Some error occured please try again!",
+      success: "false",
+    });
   }
-  const usersData = await formModel.find({}).sort({ fullName: 1 });
-  return res.json({ usersData, success: "true" });
 };
 
 const userLoginControl = async (req, res) => {
@@ -63,17 +87,22 @@ const userLoginControl = async (req, res) => {
     if (!user) {
       console.log(`User does't exist!`);
       return res.json({
-        message: `User with email id ${userEmail} doesnot exist!`,success: "false"
+        message: `User with email id ${userEmail} doesnot exist!`,
+        success: "false",
       });
     }
 
     // Check for password validity
-    const passwordValid = await bcrypt.compare(userPassword, user?.userPassword);
+    const passwordValid = await bcrypt.compare(
+      userPassword,
+      user?.userPassword
+    );
 
     if (!passwordValid) {
       console.log("password doesn't match!");
       return res.json({
-        message: "Password doesn't match. Recheck Email and Password!",success: "false"
+        message: "Password doesn't match. Recheck Email and Password!",
+        success: "false",
       });
     }
 
@@ -87,11 +116,14 @@ const userLoginControl = async (req, res) => {
       isAdmin: user?.isAdmin,
       formFilled: user?.formFilled,
       message: "User LoggedIn Successfully!!",
-      success: "true"
+      success: "true",
     });
   } catch (error) {
     console.log("Error: ", error.message);
-    return res.json({ message: "Some error occured please try again!", success: "false" });
+    return res.json({
+      message: "Some error occured please try again!",
+      success: "false",
+    });
   }
 };
 
@@ -99,9 +131,19 @@ const userAccessControl = async (req, res) => {
   const token = req.body?.token;
   const userID = jwt.decode(token, process.env.JWT_SECRET);
   const user = await userModel.findById(userID?.id);
-  console.log("Access Decided")
-  return res.json({ isAdmin: user?.isAdmin, formFilled: user?.formFilled, userEmail : user?.userEmail, isVerified: user?.isVerified });
-  // 
+  console.log("Access Decided");
+  return res.json({
+    isAdmin: user?.isAdmin,
+    formFilled: user?.formFilled,
+    userEmail: user?.userEmail,
+    isVerified: user?.isVerified,
+  });
+  //
 };
 
-export { userSignupControl, userLoginControl, userAccessControl, userDetailsDownloadControl };
+export {
+  userSignupControl,
+  userLoginControl,
+  userAccessControl,
+  userDetailsDownloadControl,
+};

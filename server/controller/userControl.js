@@ -49,7 +49,7 @@ const userDetailsDownloadControl = async (req, res) => {
 
   try {
     const userID = jwt.decode(token, process.env.JWT_SECRET);
-    const user = await userModel.find({userEmail:email});
+    const user = await userModel.findById(userID?.id);
 
     if (!user) {
       return res.status(404).json({
@@ -66,7 +66,7 @@ const userDetailsDownloadControl = async (req, res) => {
       });
     }
 
-    const usersData = await formModel.findOne({ userID });
+    const usersData = await formModel.find({ email: email });
     return res.status(200).json({ usersData, success: true });
   } catch (error) {
     console.error("Error: ", error.message);

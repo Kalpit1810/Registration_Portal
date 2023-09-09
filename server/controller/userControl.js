@@ -49,7 +49,7 @@ const userDetailsDownloadControl = async (req, res) => {
 
   try {
     const userID = jwt.decode(token, process.env.JWT_SECRET);
-    const user = await userModel.findById(userID?.id);
+    const user = await userModel.find({userEmail:email});
 
     if (!user) {
       return res.status(404).json({

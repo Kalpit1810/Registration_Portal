@@ -66,7 +66,7 @@ const userDetailsDownloadControl = async (req, res) => {
       });
     }
 
-    const usersData = await formModel.find({}).sort({ fullName: 1 });
+    const usersData = await formModel.findOne({ userID });
     return res.status(200).json({ usersData, success: true });
   } catch (error) {
     console.error("Error: ", error.message);
@@ -76,7 +76,6 @@ const userDetailsDownloadControl = async (req, res) => {
     });
   }
 };
-
 
 const userLoginControl = async (req, res) => {
   const { userEmail, userPassword } = req.body;

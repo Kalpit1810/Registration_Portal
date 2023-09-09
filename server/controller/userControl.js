@@ -37,6 +37,22 @@ const userSignupControl = async (req, res) => {
   }
 };
 
+const userDetailsDownloadControl = async (req, res) => {
+  const token = req.body?.token;
+  const email = req.body?.email;
+  const userID = jwt.decode(token, process.env.JWT_SECRET);
+  const user = await userModel.findById(userID?.id);
+  if (!user) {
+    if(user.userEmail!==email)
+    {
+      console.log("Unautorized Access!");
+      return res.json({ message: "User Details Not found", success: "false" });
+    }
+  }
+  const usersData = await formModel.find({}).sort({ fullName: 1 });
+  return res.json({ usersData, success: "true" });
+};
+
 const userLoginControl = async (req, res) => {
   const { userEmail, userPassword } = req.body;
 
@@ -88,4 +104,4 @@ const userAccessControl = async (req, res) => {
   // 
 };
 
-export { userSignupControl, userLoginControl, userAccessControl };
+export { userSignupControl, userLoginControl, userAccessControl, userDetailsDownloadControl };

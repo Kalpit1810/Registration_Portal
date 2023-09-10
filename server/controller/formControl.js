@@ -139,16 +139,19 @@ p {
 <div class="container">
   
   <img class="header-img" src="https://ihmtc2023.co.in/static/media/headerImg2.cc1dc4946a29924f1790.jpeg" alt="IHMTC Poster">
-  <h1 class="congrats">Congratulations on completing your registration!</h1>
+  <h1 class="congrats">Thanks for filling the IHMTC 2023 registration form.</h1>
+      <h3><strong>NOTE:</strong> Your registration as per the details provided below is pending verification. The conference organizing committee after verifying payment status will send another confirmation email. Kindly contact the conference organizers at ihmtc2023@iitp.ac.in if you do not receive the confirmation email within next 3 working days.</h3>
       <h3>Conference Registration Details</h3>
       <p><strong>First Name:</strong> ${formData?.firstName}</p>
        ${
-         formData?.middleName ?
-         `<p><strong>Middle Name:</strong>${formData?.middleName}</p>`:""
+         formData?.middleName
+           ? `<p><strong>Middle Name:</strong>${formData?.middleName}</p>`
+           : ""
        }
        ${
-         formData?.lastName ?
-         `<p><strong>Last Name:</strong>${formData?.lastName}</p>`:""
+         formData?.lastName
+           ? `<p><strong>Last Name:</strong>${formData?.lastName}</p>`
+           : ""
        }
       <p><strong>Honorific:</strong> ${formData?.honorific}</p>
       <p><strong>Gender:</strong> ${formData?.gender}</p>
@@ -162,17 +165,20 @@ p {
     formData?.contactNumber
   }</p>
       ${
-        formData?.whatsappNumberCode ?
-        `<p><strong>WhatsApp Number:</strong> ${formData?.whatsappNumberCode}-${formData?.whatsappNumber} </p>`:""
+        formData?.whatsappNumberCode
+          ? `<p><strong>WhatsApp Number:</strong> ${formData?.whatsappNumberCode}-${formData?.whatsappNumber} </p>`
+          : ""
       }
       <p><strong>Number of Papers:</strong> ${formData?.paperCount}</p>
       ${
-        (formData?.paperCount === "1" || formData?.paperCount === "2") ?
-        `<p><strong>Submission ID of Paper #1:</strong> ${formData?.paper1Id}</p>`:''
+        formData?.paperCount === "1" || formData?.paperCount === "2"
+          ? `<p><strong>Submission ID of Paper #1:</strong> ${formData?.paper1Id}</p>`
+          : ""
       }
       ${
-        formData?.paperCount === "2" ?
-        `<p><strong>Submission ID of Paper #2:</strong> ${formData?.paper2Id}</p>`:""
+        formData?.paperCount === "2"
+          ? `<p><strong>Submission ID of Paper #2:</strong> ${formData?.paper2Id}</p>`
+          : ""
       }
       <p><strong>Profile:</strong> ${formData?.profile}</p>
       <p><strong>Accompanying Persons:</strong> ${
@@ -180,20 +186,26 @@ p {
       }</p>
       <p><strong>Is ISHMT Member? :</strong> ${formData?.isIshmtMember}</p>
       ${
-        formData?.isIshmtMember === "Yes" ?
-        `<p><strong>ISHMT ID Number:</strong> ${formData?.ishmtIDno}</p>`: ""
+        formData?.isIshmtMember === "Yes"
+          ? `<p><strong>ISHMT ID Number:</strong> ${formData?.ishmtIDno} (subject to verification)</p>`
+          : ""
       }
       <p><strong>Payment Reference Number:</strong> ${
         formData?.paymentReferenceNumber
-      }</p>
+      } (subject to verification)</p>
       <p><strong>Category:</strong> ${formData?.category}</p>
-      <p><strong>Fee Paid:</strong> ${formData?.fee}</p>
+      <p><strong>Fee Paid:</strong> ${
+        formData?.fee
+      }.00  (subject to verification)</p>
        ${
-        formData?.comment ? `<p><strong>Comment:</strong></p> ${formData?.comment}`:""
-      }
+         formData?.comment
+           ? `<p><strong>Comment:</strong></p> ${formData?.comment}`
+           : ""
+       }
+      
+  <h3 class="verification-msg">We are currently verifying your registration details. You will be notified once your submitted data is verified. </h3>
   <p>For more information, please visit the <a class="link" href="https://ihmtc2023.iitp.ac.in/">official website</a>.</p>
   <p>For inquiries, contact us at <a class="link" href="mailto:ihmtc2023@gmail.com">ihmtc2023@gmail.com</a></p>
-  <p class="verification-msg">We are currently verifying your registration details. You will be notified once your submitted data is verified.</p>
 </div>
   `;
 }

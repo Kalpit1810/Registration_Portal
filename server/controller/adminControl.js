@@ -291,7 +291,7 @@ const userVerifiedControl = async (req, res) => {
   }
 };
 
-function generateEmailContent() {
+function generateEmailContent(formData) {
   return `
     <style>
 .container {
@@ -305,6 +305,10 @@ function generateEmailContent() {
   text-align: center;
 }
 
+.header-img {
+  width: 100%;
+}
+
 .link {
   color: #007bff;
   text-decoration: none;
@@ -314,7 +318,7 @@ function generateEmailContent() {
   text-decoration: underline;
 }
 
-h3 {
+h2 {
   font-size: 28px;
   margin-top: 10px;
 }
@@ -327,16 +331,81 @@ p {
   margin: 10px 0;
 }
 
+.congrats {
+  font-size: 24px;
+  color: #28a745;
+  margin-bottom: 10px;
+}
+
+.verification-msg {
+  font-style: italic;
+  color: #666;
+  margin-top: 20px;
+}
 
 </style>
 </head>
 <body>
 <div class="container">
   
-  <h3>Congratulations!!<br><br> Your registration for IHMTC 2023 has been verified. </h3>
-  <p>For more information, please visit the <a class="link" href="https://ihmtc2023.iitp.ac.in/">official website</a>.</p>
-  <p>For further queries, contact us at <a class="link" href="mailto:ihmtc2023@gmail.com">ihmtc2023@gmail.com</a></p>
-  </div>
+  <img class="header-img" src="https://ihmtc2023.co.in/static/media/headerImg2.cc1dc4946a29924f1790.jpeg" alt="IHMTC Poster">
+  <h1 class="congrats"> Congratulations on completing your registration for IHMTC 2023!</h1>
+      <h3><strong>NOTE:</strong> Your registration for the IHMTC 2023 as per the details provided below has been verified and is now complete.</h3>
+      
+      <p><strong>First Name:</strong> ${formData?.firstName}</p>
+       ${
+         formData?.middleName ?
+         `<p><strong>Middle Name:</strong>${formData?.middleName}</p>`:""
+       }
+       ${
+         formData?.lastName ?
+         `<p><strong>Last Name:</strong>${formData?.lastName}</p>`:""
+       }
+      <p><strong>Honorific:</strong> ${formData?.honorific}</p>
+      <p><strong>Gender:</strong> ${formData?.gender}</p>
+      <p><strong>Year of Birth:</strong> ${formData?.birthYear}</p>
+      <p><strong>Primary Affiliation:</strong> ${
+        formData?.primaryAffiliation
+      }</p>
+      <p><strong>Country:</strong> ${formData?.country}</p>
+      <p><strong>Email:</strong> ${formData?.email}</p>
+      <p><strong>Contact Number:</strong> ${formData?.contactNumberCode}-${
+    formData?.contactNumber
+  }</p>
+      ${
+        formData?.whatsappNumberCode ?
+        `<p><strong>WhatsApp Number:</strong> ${formData?.whatsappNumberCode}-${formData?.whatsappNumber} </p>`:""
+      }
+      <p><strong>Number of Papers:</strong> ${formData?.paperCount}</p>
+      ${
+        (formData?.paperCount === "1" || formData?.paperCount === "2") ?
+        `<p><strong>Submission ID of Paper #1:</strong> ${formData?.paper1Id}</p>`:''
+      }
+      ${
+        formData?.paperCount === "2" ?
+        `<p><strong>Submission ID of Paper #2:</strong> ${formData?.paper2Id}</p>`:""
+      }
+      <p><strong>Profile:</strong> ${formData?.profile}</p>
+      <p><strong>Accompanying Persons:</strong> ${
+        formData?.accompanyingPersons
+      }</p>
+      <p><strong>Is ISHMT Member? :</strong> ${formData?.isIshmtMember}</p>
+      ${
+        formData?.isIshmtMember === "Yes" ?
+        `<p><strong>ISHMT ID Number:</strong> ${formData?.ishmtIDno} (verified)</p>`: ""
+      }
+      <p><strong>Payment Reference Number:</strong> ${
+        formData?.paymentReferenceNumber
+      }  (verified)</p>
+      <p><strong>Category:</strong> ${formData?.category}</p>
+      <p><strong>Fee Paid:</strong> ${formData?.fee}.00  (verified)</p>
+       ${
+        formData?.comment ? `<p><strong>Comment:</strong></p> ${formData?.comment}`:""
+      }
+      <h3 class="verification-msg">This email sent by the organizing committee of IHMTC 2023 can be used as the receipt for payment made towards your IHMTC registration.</h3>
+      <p>For more information, please visit the <a class="link" href="https://ihmtc2023.iitp.ac.in/">official website</a>.</p>
+      <p>For inquiries, contact us at <a class="link" href="mailto:ihmtc2023@gmail.com">ihmtc2023@gmail.com</a></p>
+</div>
   `;
 }
 
@@ -362,7 +431,7 @@ const userVerificationEmail = async (req, res) => {
     from: "ihmtc2023@iitp.ac.in",
     to: user.userEmail,
     subject: "IHMTC 2023 Verification",
-    html: generateEmailContent(),
+    html: generateEmailContent(formData),
   };
 
   try {

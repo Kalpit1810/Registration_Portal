@@ -194,7 +194,7 @@ p {
         formData?.paymentReferenceNumber
       } (subject to verification)</p>
       <p><strong>Category:</strong> ${formData?.category}</p>
-      <p><strong>Fee Paid:</strong> ${
+      <p><strong>Fee Paid:</strong> INR ${
         formData?.fee
       }.00  (subject to verification)</p>
        ${

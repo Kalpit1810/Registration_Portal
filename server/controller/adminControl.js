@@ -398,7 +398,7 @@ p {
         formData?.paymentReferenceNumber
       }  (verified)</p>
       <p><strong>Category:</strong> ${formData?.category}</p>
-      <p><strong>Fee Paid:</strong> ${formData?.fee}.00  (verified)</p>
+      <p><strong>Fee Paid:</strong> INR ${formData?.fee}.00  (verified)</p>
        ${
         formData?.comment ? `<p><strong>Comment:</strong></p> ${formData?.comment}`:""
       }
@@ -415,10 +415,13 @@ const userVerificationEmail = async (req, res) => {
   const adminID = jwt.decode(token, process.env.JWT_SECRET);
   const admin = await userModel.findById(adminID?.id);
   const user = await userModel.findById(userID);
+  const formData = await formModel.findOne({ userID });
+  
   if (!admin?.isAdmin) {
     console.log("Unautorized Access!");
     return res.json({ message: "Access Denied", success: "false" });
   }
+  
 
   const transporter = nodemailer.createTransport({
     service: "outlook",

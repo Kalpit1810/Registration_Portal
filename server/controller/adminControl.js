@@ -398,7 +398,7 @@ p {
         formData?.paymentReferenceNumber
       }  (verified)</p>
       <p><strong>Category:</strong> ${formData?.category}</p>
-      <p><strong>Fee Paid:</strong> INR ${formData?.fee}.00  (verified)</p>
+      <p><strong>Fee Paid:</strong> ₹ ${formData?.fee}.00  (verified)</p>
        ${
         formData?.comment ? `<p><strong>Comment:</strong></p> ${formData?.comment}`:""
       }

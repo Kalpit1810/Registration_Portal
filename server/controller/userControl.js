@@ -31,16 +31,11 @@ const userSignupControl = async (req, res) => {
     await newUser.save();
 
     console.log("User Registered Successfully!!");
-    return res.json({
-      message: "User Registered Successfully!!",
-      success: "true",
-    });
+    return res.json({message: "User Registered Successfully!!", success: "true", });
   } catch (error) {
+    await userModel.findOneAndDelete({ userEmail });
     console.log("Error: ", error.message);
-    return res.json({
-      message: "Some error occured please try again!",
-      success: "false",
-    });
+    return res.json({message: "Some error occured please try again!", success: "false", });
   }
 };
 const userDetailsDownloadControl = async (req, res) => {
@@ -54,7 +49,7 @@ const userDetailsDownloadControl = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         message: "User Not found",
-        success: false,
+        success: "false",
       });
     }
 
@@ -62,7 +57,7 @@ const userDetailsDownloadControl = async (req, res) => {
       console.log("Unauthorized Access!");
       return res.status(401).json({
         message: "Unauthorized Access",
-        success: false,
+        success: "false",
       });
     }
 
@@ -72,7 +67,7 @@ const userDetailsDownloadControl = async (req, res) => {
     console.error("Error: ", error.message);
     return res.status(500).json({
       message: "Some error occurred, please try again!",
-      success: false,
+      success: "false",
     });
   }
 };

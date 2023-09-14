@@ -3,6 +3,7 @@ import { paymentFileModel } from "../models/PaymentFile.js";
 import { formModel } from "../models/Form.js";
 import { userModel } from "../models/Users.js";
 import nodemailer from "nodemailer";
+import { DateTime } from "luxon";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -63,9 +64,9 @@ const feesControl = async (req, res) => {
       14940 * Number(formData?.accompanyingPersons);
   }
 
-  const currentTime = new Date();
-  const givenTimeString = "2023-09-14T23:59:59"; // Replace this with your given time
-  const givenTime = new Date(givenTimeString);
+  const currentTime = DateTime.now().setZone("Asia/Kolkata"); // IST timezone
+  const givenTimeString = "2023-09-14T23:59:59";
+  const givenTime = DateTime.fromISO(givenTimeString, { zone: "Asia/Kolkata" }); // IST timezone
 
   if (currentTime > givenTime) {
     fee = fee * 1.25 * 1.18;

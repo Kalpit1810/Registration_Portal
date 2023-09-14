@@ -229,7 +229,7 @@ const submitControl = async (req, res) => {
         userID: formData?.userID,
       });
       await file1.save();
-      return res.json({ message: "File Uploaded", success: "true" });
+      // return res.json({ message: "File Uploaded", success: "true" });
     } catch (error) {
       console.log("Error", error);
       return res.json(

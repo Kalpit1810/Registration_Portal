@@ -60,7 +60,7 @@ const userDeleteControl = async (req, res) => {
     });
 
     const data = await userModel
-      .find({ isAdmin: "false" }, { userEmail: 1 })
+      .find({ isAdmin: "false", formFilled: "true"}, { userEmail: 1, formFilled: 1, isVerified: 1 })
       .sort({ userEmail: 1 });
 
     console.log("User Deleted Successfully!!");
@@ -302,7 +302,7 @@ function generateEmailContent(formData) {
   background-color: #f7f7f7;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  text-align: center;
+  text-align: left;
 }
 
 .header-img {

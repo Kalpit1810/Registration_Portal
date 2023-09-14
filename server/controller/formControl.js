@@ -64,7 +64,7 @@ const feesControl = async (req, res) => {
   }
 
   const currentTime = new Date();
-  const givenTimeString = "2023-11-14T23:59:59"; // Replace this with your given time
+  const givenTimeString = "2023-09-14T23:59:59"; // Replace this with your given time
   const givenTime = new Date(givenTimeString);
 
   if (currentTime > givenTime) {

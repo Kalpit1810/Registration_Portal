@@ -20,7 +20,7 @@ const userListControl = async (req, res) => {
   try {
     const data = await userModel
       .find(
-        { isAdmin: "false" },
+        { isAdmin: "false", formFilled: "true" },
         { userEmail: 1, formFilled: 1, isVerified: 1 }
       )
       .sort({ userEmail: 1 });

@@ -136,9 +136,79 @@ const userAccessControl = async (req, res) => {
   //
 };
 
+const userIshmtIDControl = async (req, res) => {
+  const token = req.body?.token;
+  const userID = req.body?.userID;
+  const decUserID = jwt.decode(token, process.env.JWT_SECRET);
+  const user = await userModel.findById(decUserID?.id);
+  if (userID!==decUserID) {
+    console.log("Unautorized Access!");
+    return res.json({ message: "Access Denied", success: "false" });
+  }
+
+  try {
+    const fileDocument = await ishmtFileModel.findOne({ userID });
+
+    if (!fileDocument) {
+      console.log("File not found");
+      return res
+        .status(404)
+        .json({ message: "File not found", success: "false" });
+    }
+
+    const fileData = fileDocument?.fileData;
+
+    res.setHeader("Content-Type", "application/octet-stream");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=${fileDocument?.fileName}`
+    );
+    res.send(fileData);
+    console.log("Ishmt ID File for user sent.");
+  } catch (error) {
+    console.error("Error retrieving file data:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const userPaymentFileControl = async (req, res) => {
+  const token = req.body?.token;
+  const userID = req.body?.userID;
+  const decUserID = jwt.decode(token, process.env.JWT_SECRET);
+  const user = await userModel.findById(adminID?.id);
+  if (decUserID!==userID) {
+    console.log("Unautorized Access!");
+    return res.json({ message: "Access Denied", success: "false" });
+  }
+
+  try {
+    const fileDocument = await paymentFileModel.findOne({ userID });
+
+    if (!fileDocument) {
+      console.log("File not found");
+      return res.status(404).json({ message: "File not found" });
+    }
+
+    const fileData = fileDocument?.fileData;
+
+    res.setHeader("Content-Type", "application/octet-stream");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=${fileDocument?.fileName}`
+    );
+    res.send(fileData);
+    console.log("Payment File for user sent.");
+  } catch (error) {
+    console.error("Error retrieving file data:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 export {
   userSignupControl,
   userLoginControl,
   userAccessControl,
   userDetailsDownloadControl,
+  userIshmtIDControl,
+  userPaymentFileControl
 };

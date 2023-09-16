@@ -3,6 +3,8 @@ import bcrypt from "bcrypt";
 import { userModel } from "../models/Users.js";
 import dotenv from "dotenv";
 import { formModel } from "../models/Form.js";
+import { ishmtFileModel } from "../models/IshmtFile.js";
+import { paymentFileModel } from "../models/PaymentFile.js";
 
 dotenv.config();
 

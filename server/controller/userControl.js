@@ -138,10 +138,10 @@ const userAccessControl = async (req, res) => {
 
 const userIshmtIDControl = async (req, res) => {
   const token = req.body?.token;
-  const userID = req.body?.userID;
-  const decUserID = jwt.decode(token, process.env.JWT_SECRET);
-  const user = await userModel.findById(decUserID?.id);
-  if (userID!==decUserID) {
+  // const userID = req.body?.userID;
+  const userID = jwt.decode(token, process.env.JWT_SECRET);
+  const user = await userModel.findById(userID?.id);
+  if (!user) {
     console.log("Unautorized Access!");
     return res.json({ message: "Access Denied", success: "false" });
   }
@@ -173,10 +173,10 @@ const userIshmtIDControl = async (req, res) => {
 
 const userPaymentFileControl = async (req, res) => {
   const token = req.body?.token;
-  const userID = req.body?.userID;
-  const decUserID = jwt.decode(token, process.env.JWT_SECRET);
-  const user = await userModel.findById(adminID?.id);
-  if (decUserID!==userID) {
+  // const userID = req.body?.userID;
+  const userID = jwt.decode(token, process.env.JWT_SECRET);
+  const user = await userModel.findById(userID?.id);
+  if (!user) {
     console.log("Unautorized Access!");
     return res.json({ message: "Access Denied", success: "false" });
   }

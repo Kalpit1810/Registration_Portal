@@ -65,7 +65,7 @@ const feesControl = async (req, res) => {
   }
 
   const currentTime = DateTime.now().setZone("Asia/Kolkata"); // IST timezone
-  const givenTimeString = "2023-09-14T23:59:59";
+  const givenTimeString = "2023-10-31T23:59:59";
   const givenTime = DateTime.fromISO(givenTimeString, { zone: "Asia/Kolkata" }); // IST timezone
 
   if (currentTime > givenTime) {

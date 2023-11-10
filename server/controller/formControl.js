@@ -214,10 +214,12 @@ p {
 const submitControl = async (req, res) => {
   const formData = req.body;
   const userData = await userModel.findById(formData?.userID);
+  // console.log(userData);
   if (userData?.formFilled) {
     console.log("form already filled");
     return res.json({ message: "Form was already filled.", success: "false" });
   }
+
   const { ishmtIDFile, paymentReceipt } = req.files;
   if (ishmtIDFile) {
     const ext = ishmtIDFile[0]?.originalname.split(`.`).pop();
@@ -256,11 +258,11 @@ const submitControl = async (req, res) => {
         userID: req.body?.userID,
       });
       console.log("Error", error);
-      return res.json(
-        { error },
-        { message: "Error Uploading File" },
-        { success: "false" }
-      );
+      return res.json({
+        error,
+        message: "Error Uploading File",
+        success: "false",
+      });
     }
   }
 
@@ -296,6 +298,7 @@ const submitControl = async (req, res) => {
       pass: process.env.PASS_EMAIL,
     },
   });
+  
   const mailOptions = {
     from: "ihmtc2023@iitp.ac.in",
     to: userMail,
@@ -304,8 +307,19 @@ const submitControl = async (req, res) => {
   };
 
   try {
-    transporter.sendMail(mailOptions, (error, info) => {
+    transporter.sendMail(mailOptions, async (error, info) => {
       if (error) {
+        await ishmtFileModel.findOneAndDelete({
+          userID: formData?.userID,
+        });
+    
+        await paymentFileModel.findOneAndDelete({
+          userID: formData?.userID,
+        });
+        await formModel.findOneAndDelete({
+          userID: formData?.userID,
+        });
+        await userModel.findByIdAndUpdate(formData?.userID, { formFilled: false });
         console.log("Error sending email:", error);
         return res.json({
           message: `Error sending email.`,

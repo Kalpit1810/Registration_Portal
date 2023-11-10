@@ -6,7 +6,11 @@ const schema = new mongoose.Schema({
   formFilled: { type: Boolean, default: false, required: true },
   isAdmin: { type: Boolean, default: false, required: true },
   isVerified: { type: Boolean, default: false, required: true },
-  date: { type: Date, default : Date.now },
+  accommodationFormFilled: { type: Boolean, default: false, required: true },
+  accommodationVerified: { type: Boolean, default: false, required: true },
+  isWaiting: { type: Boolean, default: false, required: true },
+  date: { type: Date, default: Date.now },
+  isAssigned: { type: Boolean, default: false}
 });
 
 export const userModel = mongoose.model("users", schema);

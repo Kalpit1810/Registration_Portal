@@ -33,13 +33,20 @@ const userSignupControl = async (req, res) => {
     await newUser.save();
 
     console.log("User Registered Successfully!!");
-    return res.json({message: "User Registered Successfully!!", success: "true", });
+    return res.json({
+      message: "User Registered Successfully!!",
+      success: "true",
+    });
   } catch (error) {
     await userModel.findOneAndDelete({ userEmail });
     console.log("Error: ", error.message);
-    return res.json({message: "Some error occured please try again!", success: "false", });
+    return res.json({
+      message: "Some error occured please try again!",
+      success: "false",
+    });
   }
 };
+
 const userDetailsDownloadControl = async (req, res) => {
   const token = req.body?.token;
   const email = req.body.email;
@@ -134,6 +141,8 @@ const userAccessControl = async (req, res) => {
     formFilled: user?.formFilled,
     userEmail: user?.userEmail,
     isVerified: user?.isVerified,
+    accommodationFormFilled: user?.accommodationFormFilled,
+    accommodationVerified: user?.accommodationVerified,
   });
   //
 };
@@ -205,12 +214,11 @@ const userPaymentFileControl = async (req, res) => {
   }
 };
 
-
 export {
   userSignupControl,
   userLoginControl,
   userAccessControl,
   userDetailsDownloadControl,
   userIshmtIDControl,
-  userPaymentFileControl
+  userPaymentFileControl,
 };

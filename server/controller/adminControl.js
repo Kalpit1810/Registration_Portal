@@ -6,7 +6,10 @@ import jwt from "jsonwebtoken";
 import archiver from "archiver";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+import { waitingModel } from "../models/Waiting.js";
+import { accommodationPaymentFileModel } from "../models/AccommodationPayment.js";
 dotenv.config();
+
 const userListControl = async (req, res) => {
   const token = req.body?.token;
   const userID = jwt.decode(token, process.env.JWT_SECRET);
@@ -21,9 +24,16 @@ const userListControl = async (req, res) => {
     const data = await userModel
       .find(
         { isAdmin: "false", formFilled: "true" },
-        { userEmail: 1, formFilled: 1, isVerified: 1 }
+        {
+          userEmail: 1,
+          formFilled: 1,
+          isVerified: 1,
+          accommodationFormFilled: 1,
+          accommodationVerified: 1,
+        }
       )
       .sort({ userEmail: 1 });
+    // accommodationFormFilled
     console.log("List Fetched Successfully");
     return res.json({ list: data, success: "true" });
   } catch (error) {
@@ -51,7 +61,15 @@ const userDeleteControl = async (req, res) => {
       userID: req.body?.userID,
     });
 
+    await waitingModel.findOneAndDelete({
+      userID: req.body?.userID,
+    });
+
     await paymentFileModel.findOneAndDelete({
+      userID: req.body?.userID,
+    });
+
+    await accommodationPaymentFileModel.findOneAndDelete({
       userID: req.body?.userID,
     });
 
@@ -60,7 +78,80 @@ const userDeleteControl = async (req, res) => {
     });
 
     const data = await userModel
-      .find({ isAdmin: "false", formFilled: "true"}, { userEmail: 1, formFilled: 1, isVerified: 1 })
+      .find(
+        { isAdmin: "false", formFilled: "true" },
+        {
+          userEmail: 1,
+          formFilled: 1,
+          isVerified: 1,
+          accommodationFormFilled: 1,
+          accommodationVerified: 1,
+        }
+      )
+      .sort({ userEmail: 1 });
+
+    console.log("User Deleted Successfully!!");
+    return res.json({ list: data, message: "User Deleted.", success: "true" });
+  } catch (error) {
+    console.log("Error deleting user!", error?.message);
+    return res.json({
+      error,
+      message: "Error deleting user. Please try again",
+      success: "false",
+    });
+  }
+};
+
+const userAccommodationDeleteControl = async (req, res) => {
+  const token = req.body?.token;
+  const userID = jwt.decode(token, process.env.JWT_SECRET);
+  const user = await userModel.findById(userID?.id);
+  if (!user?.isAdmin) {
+    console.log("Unautorized Access!");
+    return res.json({ message: "Access Denied", success: "false" });
+  }
+  try {
+    await userModel.findByIdAndUpdate(req.body?.userID, {
+      accommodationFormFilled: false,
+      accommodationVerified: false,
+      isAssigned: false,
+      isWaiting: false,
+    });
+
+    await waitingModel.findOneAndDelete({
+      userID: req.body?.userID,
+    });
+
+    await accommodationPaymentFileModel.findOneAndDelete({
+      userID: req.body?.userID,
+    });
+
+    await formModel.updateOne(
+      {
+        userID: req.body?.userID,
+      },
+      {
+        $set: {
+          accommodationFees: "",
+          accommodationChoice: "",
+          arrivalTime: "",
+          departureTime: "",
+          accommodationPaymentReferenceNumber: "",
+        },
+      }
+    );
+
+    const data = await userModel
+      .find(
+        { isAdmin: "false", formFilled: "true" },
+        {
+          userEmail: 1,
+          formFilled: 1,
+          isVerified: 1,
+          accommodationFormFilled: 1,
+          accommodationVerified: 1,
+        }
+      )
       .sort({ userEmail: 1 });
 
     console.log("User Deleted Successfully!!");
@@ -83,7 +174,7 @@ const userDownloadControl = async (req, res) => {
     console.log("Unautorized Access!");
     return res.json({ message: "Access Denied", success: "false" });
   }
-  const usersData = await formModel.find({}).sort({ fullName: 1 });
+  const usersData = await formModel.find({}).sort({ firstName: 1 });
   return res.json({ usersData, success: "true" });
 };
 
@@ -102,7 +193,7 @@ const userPaymentFileControl = async (req, res) => {
 
     if (!fileDocument) {
       console.log("File not found");
-      return res.status(404).json({ message: "File not found" });
+      return res.json({ message: "File not found", success: "false" });
     }
 
     const fileData = fileDocument?.fileData;
@@ -117,6 +208,42 @@ const userPaymentFileControl = async (req, res) => {
   } catch (error) {
     console.error("Error retrieving file data:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const userAccommodationPaymentFileControl = async (req, res) => {
+  const token = req.body?.token;
+  const userID = req.body?.userID;
+  const adminID = jwt.decode(token, process.env.JWT_SECRET);
+  const admin = await userModel.findById(adminID?.id);
+  if (!admin?.isAdmin) {
+    console.log("Unautorized Access!");
+    return res.json({ message: "Access Denied", success: "false" });
+  }
+
+  try {
+    const fileDocument = await accommodationPaymentFileModel.findOne({
+      userID,
+    });
+
+    if (!fileDocument) {
+      console.log("File not found");
+      return res.json({ message: "File not found", success: "false" });
+    }
+
+    const fileData = fileDocument?.fileData;
+
+    res.setHeader("Content-Type", "application/octet-stream");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=${fileDocument?.fileName}`
+    );
+
+    console.log("Payment File for user sent.");
+    return res.send(fileData);
+  } catch (error) {
+    console.error("Error retrieving file data:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -135,9 +262,7 @@ const userIshmtIDControl = async (req, res) => {
 
     if (!fileDocument) {
       console.log("File not found");
-      return res
-        .status(404)
-        .json({ message: "File not found", success: "false" });
+      return res.json({ message: "File not found", success: "false" });
     }
 
     const fileData = fileDocument?.fileData;
@@ -151,7 +276,7 @@ const userIshmtIDControl = async (req, res) => {
     console.log("Ishmt ID File for user sent.");
   } catch (error) {
     console.error("Error retrieving file data:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error", success: "false" });
   }
 };
 
@@ -354,12 +479,14 @@ p {
       
       <p><strong>First Name:</strong> ${formData?.firstName}</p>
        ${
-         formData?.middleName ?
-         `<p><strong>Middle Name:</strong>${formData?.middleName}</p>`:""
+         formData?.middleName
+           ? `<p><strong>Middle Name:</strong>${formData?.middleName}</p>`
+           : ""
        }
        ${
-         formData?.lastName ?
-         `<p><strong>Last Name:</strong>${formData?.lastName}</p>`:""
+         formData?.lastName
+           ? `<p><strong>Last Name:</strong>${formData?.lastName}</p>`
+           : ""
        }
       <p><strong>Honorific:</strong> ${formData?.honorific}</p>
       <p><strong>Gender:</strong> ${formData?.gender}</p>
@@ -373,17 +500,20 @@ p {
     formData?.contactNumber
   }</p>
       ${
-        formData?.whatsappNumberCode ?
-        `<p><strong>WhatsApp Number:</strong> ${formData?.whatsappNumberCode}-${formData?.whatsappNumber} </p>`:""
+        formData?.whatsappNumberCode
+          ? `<p><strong>WhatsApp Number:</strong> ${formData?.whatsappNumberCode}-${formData?.whatsappNumber} </p>`
+          : ""
       }
       <p><strong>Number of Papers:</strong> ${formData?.paperCount}</p>
       ${
-        (formData?.paperCount === "1" || formData?.paperCount === "2") ?
-        `<p><strong>Submission ID of Paper #1:</strong> ${formData?.paper1Id}</p>`:''
+        formData?.paperCount === "1" || formData?.paperCount === "2"
+          ? `<p><strong>Submission ID of Paper #1:</strong> ${formData?.paper1Id}</p>`
+          : ""
       }
       ${
-        formData?.paperCount === "2" ?
-        `<p><strong>Submission ID of Paper #2:</strong> ${formData?.paper2Id}</p>`:""
+        formData?.paperCount === "2"
+          ? `<p><strong>Submission ID of Paper #2:</strong> ${formData?.paper2Id}</p>`
+          : ""
       }
       <p><strong>Profile:</strong> ${formData?.profile}</p>
       <p><strong>Accompanying Persons:</strong> ${
@@ -391,8 +521,9 @@ p {
       }</p>
       <p><strong>Is ISHMT Member? :</strong> ${formData?.isIshmtMember}</p>
       ${
-        formData?.isIshmtMember === "Yes" ?
-        `<p><strong>ISHMT ID Number:</strong> ${formData?.ishmtIDno} (verified)</p>`: ""
+        formData?.isIshmtMember === "Yes"
+          ? `<p><strong>ISHMT ID Number:</strong> ${formData?.ishmtIDno} (verified)</p>`
+          : ""
       }
       <p><strong>Payment Reference Number:</strong> ${
         formData?.paymentReferenceNumber
@@ -400,8 +531,10 @@ p {
       <p><strong>Category:</strong> ${formData?.category}</p>
       <p><strong>Fee Paid:</strong> ₹ ${formData?.fee}.00  (verified)</p>
        ${
-        formData?.comment ? `<p><strong>Comment:</strong></p> ${formData?.comment}`:""
-      }
+         formData?.comment
+           ? `<p><strong>Comment:</strong></p> ${formData?.comment}`
+           : ""
+       }
       <h3 class="verification-msg">This email sent by the organizing committee of IHMTC 2023 can be used as the receipt for payment made towards your IHMTC registration.</h3>
       <p>For more information, please visit the <a class="link" href="https://ihmtc2023.iitp.ac.in/">official website</a>.</p>
       <p>For inquiries, contact us at <a class="link" href="mailto:ihmtc2023@gmail.com">ihmtc2023@gmail.com</a></p>
@@ -416,12 +549,11 @@ const userVerificationEmail = async (req, res) => {
   const admin = await userModel.findById(adminID?.id);
   const user = await userModel.findById(userID);
   const formData = await formModel.findOne({ userID });
-  
+
   if (!admin?.isAdmin) {
     console.log("Unautorized Access!");
     return res.json({ message: "Access Denied", success: "false" });
   }
-  
 
   const transporter = nodemailer.createTransport({
     service: "outlook",
@@ -460,9 +592,11 @@ const userVerificationEmail = async (req, res) => {
     });
   }
 };
+
 export {
   userListControl,
   userDeleteControl,
+  userAccommodationDeleteControl,
   userDownloadControl,
   userPaymentFileControl,
   userIshmtIDControl,
@@ -471,4 +605,5 @@ export {
   userFormDetailControl,
   userVerifiedControl,
   userVerificationEmail,
+  userAccommodationPaymentFileControl,
 };

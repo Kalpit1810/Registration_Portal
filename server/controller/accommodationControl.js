@@ -147,7 +147,7 @@ p {
   
   <img class="header-img" src="https://ihmtc2023.co.in/static/media/headerImg2.cc1dc4946a29924f1790.jpeg" alt="IHMTC Poster">
   <h2> Your request for accommodation for IHMTC 2023 has been received by the conference organizers.</h2>
-      <h3><strong>NOTE:</strong> Your accommodation request as per the details provided below is pending verification. The conference organizing committee after verifying payment status will send another confirmation email. Kindly contact the conference organizers at kalpit_2101cs34@iitp.ac.in if you do not receive the confirmation email within next 3 working days.</h3>
+      <h3><strong>NOTE:</strong> Your accommodation request as per the details provided below is pending verification. The conference organizing committee after verifying payment status will send another confirmation email. Kindly contact the conference organizers at ihmtc2023@iitp.ac.in if you do not receive the confirmation email within next 3 working days.</h3>
       <h3> Accommodation Details </h3>
       <p><strong>Accommodation choice:</strong> ${accommodationChoice}</p>
       <p><strong>Accompanying Persons:</strong> ${accompanyingPersons}</p>
@@ -471,12 +471,12 @@ const accommodationSubmitControl = async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: "outlook",
       auth: {
-        user: "kalpit_2101cs34@iitp.ac.in",
+        user: "ihmtc2023@iitp.ac.in",
         pass: process.env.PASS_EMAIL,
       },
     });
     const mailOptions = {
-      from: "kalpit_2101cs34@iitp.ac.in",
+      from: "ihmtc2023@iitp.ac.in",
       to: email,
       subject: "IHMTC 2023 Accommodation Booking Details",
       html: generateEmailContent(
@@ -630,13 +630,13 @@ const accommodationVerifiedControl = async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: "outlook",
       auth: {
-        user: "kalpit_2101cs34@iitp.ac.in",
+        user: "ihmtc2023@iitp.ac.in",
         pass: process.env.PASS_EMAIL,
       },
     });
 
     const mailOptions = {
-      from: "kalpit_2101cs34@iitp.ac.in",
+      from: "ihmtc2023@iitp.ac.in",
       to: user.userEmail,
       subject: "IHMTC 2023 Accommodation Confirmation",
       html: generateVerificationEmailContent(

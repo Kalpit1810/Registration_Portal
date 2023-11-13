@@ -558,12 +558,12 @@ const userVerificationEmail = async (req, res) => {
   const transporter = nodemailer.createTransport({
     service: "outlook",
     auth: {
-      user: "kalpit_2101cs34@iitp.ac.in",
+      user: "ihmtc2023@iitp.ac.in",
       pass: process.env.PASS_EMAIL,
     },
   });
   const mailOptions = {
-    from: "kalpit_2101cs34@iitp.ac.in",
+    from: "ihmtc2023@iitp.ac.in",
     to: user.userEmail,
     subject: "IHMTC 2023 Verification",
     html: generateEmailContent(formData),

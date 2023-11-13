@@ -142,7 +142,7 @@ p {
   
   <img class="header-img" src="https://ihmtc2023.co.in/static/media/headerImg2.cc1dc4946a29924f1790.jpeg" alt="IHMTC Poster">
   <h1 class="congrats">Thanks for filling the IHMTC 2023 registration form.</h1>
-      <h3><strong>NOTE:</strong> Your registration as per the details provided below is pending verification. The conference organizing committee after verifying payment status will send another confirmation email. Kindly contact the conference organizers at kalpit_2101cs34@iitp.ac.in if you do not receive the confirmation email within next 3 working days.</h3>
+      <h3><strong>NOTE:</strong> Your registration as per the details provided below is pending verification. The conference organizing committee after verifying payment status will send another confirmation email. Kindly contact the conference organizers at ihmtc2023@iitp.ac.in if you do not receive the confirmation email within next 3 working days.</h3>
       <h3>Conference Registration Details</h3>
       <p><strong>First Name:</strong> ${formData?.firstName}</p>
        ${
@@ -303,13 +303,13 @@ const submitControl = async (req, res) => {
   const transporter = nodemailer.createTransport({
     service: "outlook",
     auth: {
-      user: "kalpit_2101cs34@iitp.ac.in",
+      user: "ihmtc2023@iitp.ac.in",
       pass: process.env.PASS_EMAIL,
     },
   });
   
   const mailOptions = {
-    from: "kalpit_2101cs34@iitp.ac.in",
+    from: "ihmtc2023@iitp.ac.in",
     to: userMail,
     subject: "Your Conference Registration Details",
     html: generateEmailContent(formData),

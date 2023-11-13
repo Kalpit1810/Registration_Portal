@@ -7,7 +7,7 @@ import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 dotenv.config();
 
-const waitingListControl = async (req, res) => {
+const accommodationListControl = async (req, res) => {
   const token = req.body?.token;
   const userID = jwt.decode(token, process.env.JWT_SECRET);
   const user = await userModel.findById(userID?.id);
@@ -18,8 +18,8 @@ const waitingListControl = async (req, res) => {
   }
 
   try {
-    const data = await waitingModel.find({});
-    console.log("Waiting List Fetched Successfully");
+    const data = await waitingModel.find().sort({ userEmail: 1 });
+    console.log("accommodation List Fetched Successfully");
     return res.json({ list: data, success: "true" });
   } catch (error) {
     console.log("Error catching waiting list", error?.message);
@@ -31,27 +31,21 @@ const waitingListControl = async (req, res) => {
   }
 };
 
-const waitingAddControl = async (req, res) => {
-  const token = req.body?.token;
-  const userID = jwt.decode(token, process.env.JWT_SECRET);
-
+const accommodationAddControl = async (req, res) => {
   try {
-    const user = await userModel.findByIdAndUpdate(userID?.id, {
-      isWaiting: true,
-    });
-    const u = await waitingModel.findOne({ userID: userID.id });
-    if (u) {
-      console.log("User already in the waiting list");
-      return res.json({
-        message: "You are already in the waiting List",
-        success: "true",
+    const data = await formModel.find(
+      { profile: { $ne: "student" } },
+      { userID: 1, email: 1 }
+    );
+    data.map(async (user) => {
+      const newUser = new waitingModel({
+        userID: user.userID,
+        userEmail: user.email,
+        date: user.date,
       });
-    }
-    const newUser = new waitingModel({
-      userID: userID.id,
-      userEmail: user.userEmail,
+      await newUser.save();
     });
-    await newUser.save();
+    const list = await waitingModel.find({});
     console.log("User added in the waiting list Successfully");
     return res.json({ message: "Added In the waiting List", success: "true" });
   } catch (error) {
@@ -92,7 +86,8 @@ function generateEmailContent(
   accommodationFees,
   accommodationPaymentReferenceNumber,
   arrivalTime,
-  departureTime,accompanyingPersons
+  departureTime,
+  accompanyingPersons
 ) {
   return `
     <style>
@@ -152,7 +147,7 @@ p {
   
   <img class="header-img" src="https://ihmtc2023.co.in/static/media/headerImg2.cc1dc4946a29924f1790.jpeg" alt="IHMTC Poster">
   <h2> Your request for accommodation for IHMTC 2023 has been received by the conference organizers.</h2>
-      <h3><strong>NOTE:</strong> Your accommodation request as per the details provided below is pending verification. The conference organizing committee after verifying payment status will send another confirmation email. Kindly contact the conference organizers at ihmtc2023@iitp.ac.in if you do not receive the confirmation email within next 3 working days.</h3>
+      <h3><strong>NOTE:</strong> Your accommodation request as per the details provided below is pending verification. The conference organizing committee after verifying payment status will send another confirmation email. Kindly contact the conference organizers at kalpit_2101cs34@iitp.ac.in if you do not receive the confirmation email within next 3 working days.</h3>
       <h3> Accommodation Details </h3>
       <p><strong>Accommodation choice:</strong> ${accommodationChoice}</p>
       <p><strong>Accompanying Persons:</strong> ${accompanyingPersons}</p>
@@ -325,53 +320,131 @@ const accommodationSubmitControl = async (req, res) => {
     const user = await userModel.findByIdAndUpdate(userID?.id, {
       accommodationFormFilled: true,
     });
+    const formData = await formModel.findOne({ userID: userID?.id });
 
     let accommodationFees = 0,
-      accommodationChoice = "";
+      accommodationChoice = "1";
     const accommodationType = req.body?.accommodationChoice;
     const accommodationPaymentReferenceNumber =
       req.body?.accommodationPaymentReferenceNumber;
     const email = user.userEmail;
-    const arrivalTime = req.body?.arrivalTime;
-    const departureTime = req.body?.departureTime;
+    let arrivalDate = "";
+    let departureDate = "";
+    let arrivalTime = "";
+    let departureTime = "";
+
+    const totalHoursSpent = calculateTotalHours(
+      arrivalDate,
+      arrivalTime,
+      departureDate,
+      departureTime
+    );
+    const time = Math.ceil(totalHoursSpent / 24);
 
     const { accommodationPaymentReceipt } = req.files;
     if (accommodationType === "SHSPSO") {
       accommodationFees = 2600;
       accommodationChoice = "Hostel room with single occupancy";
+      arrivalTime = req.body?.arrivalTime;
+      departureTime = req.body?.departureTime;
     } else if (accommodationType === "SHSPDO") {
       accommodationFees = 2000;
       accommodationChoice = "Hostel with shared double occupancy";
+      arrivalTime = req.body?.arrivalTime;
+      departureTime = req.body?.departureTime;
     } else if (accommodationType === "SHDPDO") {
       accommodationFees = 4000;
       accommodationChoice = "Hostel with shared double occupancy";
+      arrivalTime = req.body?.arrivalTime;
+      departureTime = req.body?.departureTime;
     } else if (accommodationType === "SHTPSDO") {
       accommodationFees = 6600;
       accommodationChoice =
         "Hostel with 1 shared double occupancy + 1 single occupancy";
+      arrivalTime = req.body?.arrivalTime;
+      departureTime = req.body?.departureTime;
+    } else if (accommodationType === "Makeshift guest rooms with attached washrooms in hostels/quarters - 1000/- per day, per head") {
+      arrivalDate = req.body?.arrivalDate;
+      arrivalTime = req.body?.arrivalTime;
+      departureDate = req.body?.departureDate;
+      departureTime = req.body?.departureTime;
+
+      const totalHoursSpent = calculateTotalHours(
+        arrivalDate,
+        arrivalTime,
+        departureDate,
+        departureTime
+      );
+      const time = Math.ceil(totalHoursSpent / 24);
+      accommodationFees =
+        1000 * (Number(formData?.accompanyingPersons) + 1) * Number(time);
+      accommodationChoice =
+        "Makeshift guest rooms with attached washroom in hostels/quarters";
+      departureTime = departureDate + " " + String(departureTime) + ":00 hrs";
+      arrivalTime = arrivalDate + " " + String(arrivalTime) + ":00 hrs";
     } else if (
       accommodationType ===
-      "Makeshift guest rooms with attached washroom in hostels/quarters - 1000/- per day"
+      "Guest House (Single room) - 1400/- per day, per head"
     ) {
-      accommodationFees = 1000;
-      accommodationChoice = accommodationType;
-    } else if (
-      accommodationType === "Guest House (Single room) - 1400/- per day"
-    ) {
-      accommodationFees = 1400;
-      accommodationChoice = accommodationType;
+      arrivalDate = req.body?.arrivalDate;
+      arrivalTime = req.body?.arrivalTime;
+      departureDate = req.body?.departureDate;
+      departureTime = req.body?.departureTime;
+
+      const totalHoursSpent = calculateTotalHours(
+        arrivalDate,
+        arrivalTime,
+        departureDate,
+        departureTime
+      );
+      const time = Math.ceil(totalHoursSpent / 24);
+      accommodationFees =
+        1400 * (Number(formData?.accompanyingPersons) + 1) * Number(time);
+      accommodationChoice = "Guest House (Single room)";
+      arrivalTime = arrivalDate + " " + String(arrivalTime) + ":00 hrs";
+      departureTime = departureDate + " " + String(departureTime) + ":00 hrs";
     } else if (
       accommodationType ===
-      "Guest House (Double room with Double occupancy) - 2000/- per day"
+      "Guest House (Double room with Double occupancy) - 2000/- per day, per head"
     ) {
-      accommodationFees = 2000;
-      accommodationChoice = accommodationType;
+      arrivalDate = req.body?.arrivalDate;
+      arrivalTime = req.body?.arrivalTime;
+      departureDate = req.body?.departureDate;
+      departureTime = req.body?.departureTime;
+
+      const totalHoursSpent = calculateTotalHours(
+        arrivalDate,
+        arrivalTime,
+        departureDate,
+        departureTime
+      );
+      const time = Math.ceil(totalHoursSpent / 24);
+      accommodationFees =
+        2000 * (Number(formData?.accompanyingPersons) + 1) * Number(time);
+      accommodationChoice = "Guest House (Double room with Double occupancy)";
+      departureTime = departureDate + " " + String(departureTime) + ":00 hrs";
+      arrivalTime = arrivalDate + " " + String(arrivalTime) + ":00 hrs";
     } else if (
       accommodationType ===
-      "Guest House (Double room with Single occupancy) - 1700/- per day"
+      "Guest House (Double room with Single occupancy) - 1700/- per day, per head"
     ) {
-      accommodationFees = 1700;
-      accommodationChoice = accommodationType;
+      arrivalDate = req.body?.arrivalDate;
+      arrivalTime = req.body?.arrivalTime;
+      departureDate = req.body?.departureDate;
+      departureTime = req.body?.departureTime;
+
+      const totalHoursSpent = calculateTotalHours(
+        arrivalDate,
+        arrivalTime,
+        departureDate,
+        departureTime
+      );
+      const time = Math.ceil(totalHoursSpent / 24);
+      accommodationFees =
+        1700 * (Number(formData?.accompanyingPersons) + 1) * Number(time);
+      accommodationChoice = "Guest House (Double room with Single occupancy)";
+      departureTime = departureDate + " " + String(departureTime) + ":00 hrs";
+      arrivalTime = arrivalDate + " " + String(arrivalTime) + ":00 hrs";
     }
 
     const formdata = await formModel.findOneAndUpdate(
@@ -398,12 +471,12 @@ const accommodationSubmitControl = async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: "outlook",
       auth: {
-        user: "ihmtc2023@iitp.ac.in",
+        user: "kalpit_2101cs34@iitp.ac.in",
         pass: process.env.PASS_EMAIL,
       },
     });
     const mailOptions = {
-      from: "ihmtc2023@iitp.ac.in",
+      from: "kalpit_2101cs34@iitp.ac.in",
       to: email,
       subject: "IHMTC 2023 Accommodation Booking Details",
       html: generateEmailContent(
@@ -412,7 +485,7 @@ const accommodationSubmitControl = async (req, res) => {
         accommodationPaymentReferenceNumber,
         arrivalTime,
         departureTime,
-        formdata.accompanyingPersons,
+        formdata.accompanyingPersons
       ),
     };
 
@@ -455,6 +528,89 @@ const accommodationSubmitControl = async (req, res) => {
   }
 };
 
+function calculateTotalHours(
+  arrivalDate,
+  arrivalTime,
+  departureDate,
+  departureTime
+) {
+  // Convert arrival and departure dates and times to JavaScript Date objects
+  const arrivalDateTime = new Date(`${arrivalDate}T${arrivalTime}:00:00`);
+  const departureDateTime = new Date(`${departureDate}T${departureTime}:00:00`);
+
+  // Calculate the time difference in milliseconds
+  const timeDifference = departureDateTime - arrivalDateTime;
+
+  // Convert the time difference to hours
+  const totalHours = timeDifference / (1000 * 60 * 60);
+
+  return totalHours;
+}
+
+const accommodationFeeControl = async (req, res) => {
+  const token = req.body?.token;
+  const userID = jwt.decode(token, process.env.JWT_SECRET);
+  console.log(req.body);
+
+  try {
+    const formData = await formModel.findOne({ userID: userID?.id });
+
+    let accommodationFees = 0;
+    const accommodationType = req.body?.accommodationChoice;
+    const arrivalDate = req.body?.arrivalDate;
+    const arrivalTime = req.body?.arrivalTime;
+    const departureDate = req.body?.departureDate;
+    const departureTime = req.body?.departureTime;
+
+    const totalHoursSpent = calculateTotalHours(
+      arrivalDate,
+      arrivalTime,
+      departureDate,
+      departureTime
+    );
+    const time = Math.ceil(totalHoursSpent / 24);
+
+    if (accommodationType === "Makeshift guest rooms with attached washrooms in hostels/quarters - 1000/- per day, per head") {
+      accommodationFees =
+        1000 * (Number(formData?.accompanyingPersons) + 1) * Number(time);
+    } else if (
+      accommodationType ===
+      "Guest House (Single room) - 1400/- per day, per head"
+    ) {
+      accommodationFees =
+        1400 * (Number(formData?.accompanyingPersons) + 1) * Number(time);
+    } else if (
+      accommodationType ===
+      "Guest House (Double room with Double occupancy) - 2000/- per day, per head"
+    ) {
+      accommodationFees =
+        2000 * (Number(formData?.accompanyingPersons) + 1) * Number(time);
+    } else if (
+      accommodationType ===
+      "Guest House (Double room with Single occupancy) - 1700/- per day, per head"
+    ) {
+      console.log(formData?.accompanyingPersons);
+      accommodationFees =
+        1700 * (Number(formData?.accompanyingPersons) + 1) * Number(time);
+    }
+
+    console.log("Accommodation Fee calculated Successfully");
+    return res.json({
+      accommodationFees,
+      message: "Booking Successfull",
+      success: "true",
+    });
+  } catch (error) {
+    console.log("Error while calculating Fee:  ", error);
+
+    return res.json({
+      error,
+      message: "Error while calculating Fee. Please Try Again...",
+      success: "false",
+    });
+  }
+};
+
 const accommodationVerifiedControl = async (req, res) => {
   const token = req.body?.token;
   const userID = req.body?.userID;
@@ -474,13 +630,13 @@ const accommodationVerifiedControl = async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: "outlook",
       auth: {
-        user: "ihmtc2023@iitp.ac.in",
+        user: "kalpit_2101cs34@iitp.ac.in",
         pass: process.env.PASS_EMAIL,
       },
     });
 
     const mailOptions = {
-      from: "ihmtc2023@iitp.ac.in",
+      from: "kalpit_2101cs34@iitp.ac.in",
       to: user.userEmail,
       subject: "IHMTC 2023 Accommodation Confirmation",
       html: generateVerificationEmailContent(
@@ -489,7 +645,7 @@ const accommodationVerifiedControl = async (req, res) => {
         formData.accommodationPaymentReferenceNumber,
         formData.arrivalTime,
         formData.departureTime,
-        formData.accompanyingPersons,
+        formData.accompanyingPersons
       ),
     };
 
@@ -532,53 +688,12 @@ const assignAccommodationControl = async (req, res) => {
       accommodationChoice,
     });
     const ID = waitingUser.userID;
-    const user = await userModel.findByIdAndUpdate(ID, {
+    await userModel.findByIdAndUpdate(ID, {
       isAssigned: true,
-      isWaiting: false,
     });
 
-    // const formData = await formModel.findById(ID);
-
-    const transporter = nodemailer.createTransport({
-      service: "outlook",
-      auth: {
-        user: "ihmtc2023@iitp.ac.in",
-        pass: process.env.PASS_EMAIL,
-      },
-    });
-
-    const mailOptions = {
-      from: "ihmtc2023@iitp.ac.in",
-      to: user.userEmail,
-      subject: "Book your Accommodation for Guest house / guest room",
-      html: generateAccommodationEmailContent(accommodationChoice),
-    };
-
-    transporter.sendMail(mailOptions, async (error, info) => {
-      if (error) {
-        console.log("Error sending email: ", error);
-
-        const waitingUser = await waitingModel.findByIdAndUpdate(userID, {
-          accommodationChoice: "",
-        });
-        const ID = waitingUser.userID;
-        const user = await userModel.findByIdAndUpdate(ID, {
-          isAssigned: false,
-          isWaiting: true,
-        });
-
-        res.json({
-          error: "Couldn't send email.",
-          message: "Couldn't change the verification status",
-          success: "false",
-        });
-      } else {
-        console.log("Email sent: " + info.response);
-        res.json({ message: "Accommodation assigned", success: "true" });
-      }
-    });
-
-    return res;
+    console.log("Accommodation assigned");
+    return res.json({ message: "Accommodation assigned", success: "true" });
   } catch (error) {
     console.log("Error : ", error);
     return res.json({
@@ -614,11 +729,12 @@ const fetchAccommodationControl = async (req, res) => {
 };
 
 export {
-  waitingListControl,
+  accommodationListControl,
   accessControl,
-  waitingAddControl,
+  accommodationAddControl,
   accommodationSubmitControl,
   accommodationVerifiedControl,
   assignAccommodationControl,
   fetchAccommodationControl,
+  accommodationFeeControl,
 };

@@ -118,9 +118,9 @@ const userAccommodationDeleteControl = async (req, res) => {
       isWaiting: false,
     });
 
-    await waitingModel.findOneAndDelete({
+    await waitingModel.findOneAndUpdate({
       userID: req.body?.userID,
-    });
+    },{accommodationChoice: ""});
 
     await accommodationPaymentFileModel.findOneAndDelete({
       userID: req.body?.userID,
@@ -558,12 +558,12 @@ const userVerificationEmail = async (req, res) => {
   const transporter = nodemailer.createTransport({
     service: "outlook",
     auth: {
-      user: "ihmtc2023@iitp.ac.in",
+      user: "kalpit_2101cs34@iitp.ac.in",
       pass: process.env.PASS_EMAIL,
     },
   });
   const mailOptions = {
-    from: "ihmtc2023@iitp.ac.in",
+    from: "kalpit_2101cs34@iitp.ac.in",
     to: user.userEmail,
     subject: "IHMTC 2023 Verification",
     html: generateEmailContent(formData),

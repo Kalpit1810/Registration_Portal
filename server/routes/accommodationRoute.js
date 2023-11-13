@@ -1,12 +1,13 @@
 import express from "express";
 import {
-  waitingListControl,
+  accommodationListControl,
   accessControl,
-  waitingAddControl,
+  accommodationAddControl,
   accommodationSubmitControl,
   accommodationVerifiedControl,
   assignAccommodationControl,
   fetchAccommodationControl,
+  accommodationFeeControl
 } from "../controller/accommodationControl.js";
 import multer from "multer";
 
@@ -16,11 +17,12 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 accommodationRouter.post("/access", accessControl);
-accommodationRouter.post("/waiting-add", waitingAddControl);
-accommodationRouter.post("/waiting-list", waitingListControl);
+accommodationRouter.post("/waiting-add", accommodationAddControl);
+accommodationRouter.post("/accommodation-list", accommodationListControl);
 accommodationRouter.put("/verification", accommodationVerifiedControl);
 accommodationRouter.put("/assign", assignAccommodationControl);
 accommodationRouter.post("/fetch", fetchAccommodationControl);
+accommodationRouter.post("/fee", accommodationFeeControl);
 accommodationRouter.post(
   "/submit",
   upload.fields([{ name: "accommodationPaymentReceipt" }]),

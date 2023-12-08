@@ -378,7 +378,7 @@ const allAccomodationFilesControl = async (req, res) => {
 
     res.setHeader(
       "Content-Disposition",
-      "attachment; filename=IshmtIDFiles.zip"
+      "attachment; filename=accommodationPaymentFiles.zip"
     );
     res.setHeader("Content-Type", "application/zip");
 
